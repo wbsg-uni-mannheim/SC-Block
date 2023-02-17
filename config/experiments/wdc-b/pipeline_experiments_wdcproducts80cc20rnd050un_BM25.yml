@@ -1,0 +1,67 @@
+---
+general:
+  k: 200
+  k_range: False # Decide if multiple k values 1 - k are tested
+  save_results_with_evidences: True
+  es_instance: 'wifo5-33.informatik.uni-mannheim.de'
+  experiment-type: 'retrieval'
+  clusters: False
+
+query-tables:
+  schema_org_class: 'wdc-b'
+  gt-table: null
+  #gt-table: 'iherb_com'
+  path-to-query-table: null
+  context-attributes: ['brand', 'name', 'price', 'pricecurrency', 'description']
+  target-attributes: [ ]
+
+pipelines:
+  retrieval-strategies:
+
+    - name: 'query_by_entity'
+      all_attributes: True
+      tokenizer: null
+
+  similarity-re-ranking-strategies:
+
+    - name: 'magellan_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: 'RF'
+      matcher: True
+
+    - name: 'ditto_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: 'roberta_40_epochs_256_max_len/Structured/wdc-b'
+      base_model: 'roberta'
+      matcher: True
+      max_len: 256
+      ditto_config:
+        name: 'wdc-b'
+        summarizer: True
+        dk_injector: 'product'
+        trainset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/wdc-b/train.txt'
+        validset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/wdc-b/valid.txt'
+        testset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/wdc-b/test.txt'
+
+    - name: 'supcon_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: '/ceph/alebrink/contrastive-product-matching/reports/contrastive-ft-siamese/wdcproducts80cc20rnd000un-raw-large-1024-5e-05-0.07-200-frozen-roberta-base/0'
+      base_model: 'roberta-base'
+      matcher: True
+
+    - name: 'huggingface_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: '/ceph/alebrink/contrastive-product-matching/reports/cross_encoder/wdc-b-64-5e-5-50-roberta-base/0'
+      base_model: 'roberta-base'
+      matcher: True
+
+
+  source-re-ranking-strategies:
+    - name: null
+  #     -
+  #        name: 'page_rank_re_ranker'
+
+  voting-strategies:
+    - name: simple
+#      -
+#        name: weighted

@@ -1,0 +1,75 @@
+---
+general:
+  k: 26
+  k_range: False # Decide if multiple k values 1 - k are tested
+  save_results_with_evidences: False
+  es_instance: 'wifo5-33.informatik.uni-mannheim.de'
+  experiment-type: 'retrieval'
+  clusters: False
+
+query-tables:
+  schema_org_class: 'walmart-amazon_1'
+  gt-table: null
+  #gt-table: 'iherb_com'
+  path-to-query-table: null
+  context-attributes: ['name', 'category', 'brand', 'modelno', 'price']
+  target-attributes: [ ]
+
+pipelines:
+  retrieval-strategies:
+
+    - name: 'query_by_neural_entity'
+      bi-encoder: 'supcon_bi_encoder'
+      # Choose pooling 'mean' or 'cls' for now
+      pooling: [ 'mean' ]
+      # Choose simialrities 'cos', 'f2' or 'ip' for now
+      similarity: [ 'cos' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/walmart-amazon-barlow-del64-5e-5--20-roberta-base' ]
+      base_model: 'roberta-base'
+      with_projection: False
+      projection: 768
+
+  similarity-re-ranking-strategies:
+
+    - name: 'magellan_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: 'RF'
+      matcher: True
+
+    - name: 'ditto_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: 'roberta_40_epochs_256_max_len/Structured/Walmart-Amazon'
+      base_model: 'roberta'
+      matcher: True
+      max_len: 256
+      ditto_config:
+        name: 'Walmart-Amazon'
+        summarizer: True
+        dk_injector: 'product'
+        trainset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/Walmart-Amazon/train.txt'
+        validset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/Walmart-Amazon/valid.txt'
+        testset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/Walmart-Amazon/test.txt'
+    #
+    #
+    - name: 'supcon_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: '/ceph/alebrink/contrastive-product-matching/reports/contrastive-ft-siamese/walmart-amazon-clean-1024-5e-5-0.07-20-50-frozen-roberta-base/0'
+      base_model: 'roberta-base'
+      matcher: True
+#
+    - name: 'huggingface_re_ranker'
+      # Supply only one cross encoder for now!
+      model_name: '/ceph/alebrink/contrastive-product-matching/reports/cross_encoder/walmart-amazon-64-5e-5-50-roberta-base/0'
+      base_model: 'roberta-base'
+      matcher: True
+
+
+  source-re-ranking-strategies:
+    - name: null
+  #     -
+  #        name: 'page_rank_re_ranker'
+
+  voting-strategies:
+    - name: simple
+#      -
+#        name: weighted

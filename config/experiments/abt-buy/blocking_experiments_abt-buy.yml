@@ -1,0 +1,75 @@
+---
+general:
+  k: 30
+  k_range: True # Decide if multiple k values 1 - k are tested
+  save_results_with_evidences: True
+  es_instance: 'wifo5-33.informatik.uni-mannheim.de'
+  experiment-type: 'retrieval'
+  clusters: False
+
+query-tables:
+  schema_org_class: 'abt-buy'
+  gt-table: null
+  #gt-table: 'iherb_com'
+  path-to-query-table: null
+  context-attributes: [ 'name', 'price', 'description' ]
+  target-attributes: [ 'brand' ]
+
+pipelines:
+  retrieval-strategies:
+    - name: 'query_by_entity'
+      all_attributes: True
+      tokenizer: null
+
+    - name: 'query_by_entity'
+      all_attributes: True
+      tokenizer: 'tri-gram'
+
+    - name: 'query_by_neural_entity'
+      bi-encoder: 'supcon_bi_encoder'
+      # Choose pooling 'mean' or 'cls' for now
+      pooling: [ 'mean' ]
+      # Choose simialrities 'cos', 'f2' or 'ip' for now
+      similarity: [ 'cos' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/abtbuy-clean-1024-5e-5-0.07-20-roberta-base' ]
+      base_model: 'roberta-base'
+      with_projection: False
+      projection: 768
+
+    - name: 'query_by_neural_entity'
+      bi-encoder: 'supcon_bi_encoder'
+      # Choose pooling 'mean' or 'cls' for now
+      pooling: [ 'mean' ]
+      # Choose simialrities 'cos', 'f2' or 'ip' for now
+      similarity: [ 'cos' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/abtbuy-barlow-del64-5e-5-0.07-20-roberta-base' ]
+      base_model: 'roberta-base'
+      with_projection: False
+      projection: 768
+
+    - name: 'query_by_neural_entity'
+      bi-encoder: 'supcon_bi_encoder'
+      # Choose pooling 'mean' or 'cls' for now
+      pooling: [ 'mean' ]
+      # Choose simialrities 'cos', 'f2' or 'ip' for now
+      similarity: [ 'cos' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/abtbuy-simclr-del1024-5e-5-0.07-20-roberta-base' ]
+      base_model: 'roberta-base'
+      with_projection: False
+      projection: 768
+
+
+  similarity-re-ranking-strategies:
+    #- name: null
+
+    - name: 'Dummy Similarity Reranker'
+
+  source-re-ranking-strategies:
+    - name: null
+  #     -
+  #        name: 'page_rank_re_ranker'
+
+  voting-strategies:
+    - name: simple
+#      -
+#        name: weighted
