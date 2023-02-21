@@ -1,6 +1,6 @@
 import pandas as pd
 
-datasets = ['Abt-Buy', 'Amazon-Google', 'Walmart-Amazon_1', 'wdcproducts80cc20rnd000un']
+datasets = ['abt-buy', 'amazon-google', 'walmart-amazon_1', 'wdcproducts80cc20rnd000un']
 
 
 for dataset in datasets:

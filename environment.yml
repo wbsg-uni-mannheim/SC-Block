@@ -1,0 +1,12 @@
+name: sc-block
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - click
+  - pandas
+  - elasticsearch=7.17.0
+  - phonenumbers
+  - country_converter
+  - pyyaml
+prefix: /home/alebrink/anaconda3/envs/sc-block

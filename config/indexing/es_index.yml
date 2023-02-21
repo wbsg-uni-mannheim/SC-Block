@@ -1,0 +1,62 @@
+---
+index_configuration:
+   default:
+      mappings:
+         date_detection: false
+   bi-gram:
+      mappings:
+         date_detection: false
+         dynamic_templates:
+            - string:
+                 match_mapping_type: 'string'
+                 mapping:
+                    type: 'text'
+                    analyzer: 'my_analyzer'
+      settings:
+         analysis:
+            analyzer:
+               my_analyzer:
+                  tokenizer: 'ngram_tokenizer'
+            tokenizer:
+               ngram_tokenizer:
+                  type: 'ngram'
+                  min_gram: 2
+                  max_gram: 2
+   tri-gram:
+      mappings:
+         date_detection: false
+         dynamic_templates:
+            - string:
+                 match_mapping_type: 'string'
+                 mapping:
+                    type: 'text'
+                    analyzer: 'my_analyzer'
+      settings:
+         analysis:
+            analyzer:
+               my_analyzer:
+                  tokenizer: 'ngram_tokenizer'
+            tokenizer:
+               ngram_tokenizer:
+                  type: 'ngram'
+                  min_gram: 3
+                  max_gram: 3
+   bi+tri-gram:
+      mappings:
+         date_detection: false
+         dynamic_templates:
+            - string:
+                 match_mapping_type: 'string'
+                 mapping:
+                    type: 'text'
+                    analyzer: 'my_analyzer'
+      settings:
+         analysis:
+            analyzer:
+               my_analyzer:
+                  tokenizer: 'ngram_tokenizer'
+            tokenizer:
+               ngram_tokenizer:
+                  type: 'ngram'
+                  min_gram: 2
+                  max_gram: 3

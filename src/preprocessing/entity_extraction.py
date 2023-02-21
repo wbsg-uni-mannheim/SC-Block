@@ -3,15 +3,15 @@ import re
 from src.preprocessing.value_normalizer import get_datatype, normalize_value, detect_not_none_value
 
 
-def extract_entity(raw_entity, schema_org_class):
+def extract_entity(raw_entity, dataset):
     """Extract entity from raw json"""
     entity = {}
 
     # Normalize/ unpack raw_entity if necessary
     for raw_key in raw_entity.keys():
-        key = normalize_key(raw_key, schema_org_class)
+        key = normalize_key(raw_key, dataset)
 
-        if check_key_is_relevant(key, schema_org_class):
+        if check_key_is_relevant(key, dataset):
             if type(raw_entity[raw_key]) is str and len(raw_entity[raw_key]) > 0 and detect_not_none_value(raw_entity[raw_key]):
                 normalized_value = normalize_value(raw_entity[raw_key], get_datatype(key), raw_entity, entity)
                 if len(normalized_value) > 0 and detect_not_none_value(normalized_value):
@@ -27,8 +27,8 @@ def extract_entity(raw_entity, schema_org_class):
                 else:
                     for raw_property_key in raw_entity[raw_key].keys():
 
-                        property_key = normalize_key(raw_property_key, schema_org_class)
-                        if check_key_is_relevant(property_key, schema_org_class):
+                        property_key = normalize_key(raw_property_key, dataset)
+                        if check_key_is_relevant(property_key, dataset):
                             if len(raw_entity[raw_key][raw_property_key]) > 0 \
                                     and detect_not_none_value(raw_entity[raw_key][raw_property_key]):
                                 normalized_value = normalize_value(raw_entity[raw_key][raw_property_key],
@@ -81,35 +81,35 @@ def normalize_key(key_value, schema_org):
     return key_value
 
 
-def check_key_is_relevant(key, schema_org_class):
+def check_key_is_relevant(key, dataset):
     """Check if entity key is reasonable for the schema org class"""
     #Check key length > 0
-    if schema_org_class == 'movie':
+    if dataset == 'movie':
         attributes = ['name', 'director', 'description', 'duration', 'datepublished']
-    elif schema_org_class == 'hotel':
+    elif dataset == 'hotel':
         attributes = ['address', 'addresslocality', 'addressregion', 'addresscountry', 'latitude', 'longitude', 'postalcode',
                       'name', 'description', 'streetaddress', 'telephone', 'geo', 'geomidpoint', 'email', 'location', 'brand']
-    elif schema_org_class == 'localbusiness':
+    elif dataset == 'localbusiness':
         attributes = ['address', 'addresslocality', 'addressregion', 'addresscountry', 'latitude', 'longitude', 'postalcode',
                       'name', 'description', 'streetaddress', 'telephone', 'geo', 'geomidpoint', 'email', 'location', 'brand',
                       'openinghours', 'vatid', 'openinghoursspecification', 'opens', 'closes', 'dayofweek', 'taxid',
                       'vatid']
-    elif schema_org_class == 'product':
+    elif dataset == 'product':
         attributes = ['name', 'brand', 'manufacturer', 'weight', 'model', 'releasedate', 'width', 'height', 'depth',
                       'description', 'color', 'mpn', 'sku', 'gtin14', 'gtin13', 'gtin12', 'gtin8', 'gtin']
-    elif schema_org_class == 'abt-buy':
+    elif dataset == 'abt-buy':
         attributes = ['name', 'description', 'price']
-    elif schema_org_class == 'amazon-google':
+    elif dataset == 'amazon-google':
         attributes = ['name', 'manufacturer', 'price']
-    elif schema_org_class in ['dblp-acm_1', 'dblp-acm_2', 'dblp-googlescholar_1', 'dblp-googlescholar_2']:
+    elif dataset in ['dblp-acm_1', 'dblp-acm_2', 'dblp-googlescholar_1', 'dblp-googlescholar_2']:
         attributes = ['name', 'authors', 'venue', 'year']
-    elif schema_org_class in ['itunes-amazon_1', 'itunes-amazon_2']:
+    elif dataset in ['itunes-amazon_1', 'itunes-amazon_2']:
         attributes = ['name', 'artist_name', 'album_name', 'genre', 'price', 'copyright', 'time', 'released']
-    elif schema_org_class in ['walmart-amazon_1', 'walmart-amazon_2']:
+    elif dataset in ['walmart-amazon_1', 'walmart-amazon_2']:
         attributes = ['name', 'category', 'brand', 'modelno', 'price']
-    elif 'wdcproducts' in schema_org_class:
+    elif 'wdcproducts' in dataset:
         attributes = ['brand', 'name', 'price', 'pricecurrency', 'description']
     else:
-        raise ValueError('Schema org class {} is not known!'.format(schema_org_class))
+        raise ValueError('Dataset {} is not known!'.format(dataset))
 
     return key in attributes

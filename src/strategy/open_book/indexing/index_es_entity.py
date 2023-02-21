@@ -11,8 +11,6 @@ from multiprocessing import Pool
 
 from tqdm import tqdm
 
-from src.data.localbusiness.load_clusters import load_clusters as load_localbusiness_clusters
-from src.data.product.load_clusters import load_clusters as load_product_clusters
 from src.preprocessing.entity_extraction import extract_entity
 from src.strategy.open_book.entity_serialization import EntitySerializer
 from src.strategy.open_book.es_helper import determine_es_index_name
@@ -21,15 +19,14 @@ from src.strategy.open_book.retrieval.retrieval_strategy import load_es_index_co
 
 
 @click.command()
-@click.option('--schema_org_class')
-@click.option('--worker', help='Number of workers', type=int)
+@click.option('--dataset')
+@click.option('--worker', help='Number of workers', type=int, default=1)
 @click.option('--tokenizer', help='Tokenizer for ES Index', default=None)
 @click.option('--no-test/--test', default=True)
-@click.option('--with-clusters/--without-clusters', default=False)
-@click.option('--with-language-detection/--without-language-detection', default=True)
-@click.option('--duplicate-check/--no-duplicate-check', default=True)
-@click.option('--entity-length-check/--no-entity-length-check', default=True)
-def load_data(schema_org_class, worker, tokenizer, no_test, with_clusters, with_language_detection, duplicate_check, entity_length_check):
+@click.option('--with-language-detection/--without-language-detection', default=False)
+@click.option('--duplicate-check/--no-duplicate-check', default=False)
+@click.option('--entity-length-check/--no-entity-length-check', default=False)
+def load_data(dataset, worker, tokenizer, no_test, with_language_detection, duplicate_check, entity_length_check):
     logger = logging.getLogger()
 
     # Connect to Elasticsearch
@@ -40,51 +37,12 @@ def load_data(schema_org_class, worker, tokenizer, no_test, with_clusters, with_
 
     start = time.time()
     clusters = None
-    if with_clusters:
-        # To-Do: Normalize paths to clusters
-        if schema_org_class == 'localbusiness':
-            path_to_cluster = 'localbusiness/telephone_geo_cluster_summary.json'
-            raw_clusters = load_localbusiness_clusters(path_to_cluster)
-        elif schema_org_class == 'product':
-            path_to_lspc_table_corpus_mappings = '{}/cluster/product/lspc2020_to_tablecorpus'.format(
-                os.environ['DATA_DIR'])
-            raw_clusters = load_product_clusters(
-                '{}_filtered/{}'.format(path_to_lspc_table_corpus_mappings, 'filtered_product_clusters.json.gz'), None)
-        else:
-            ValueError('Schema Org class {} is not known'.format(schema_org_class))
 
-        clusters = {}
-        no_clustered_records = 0
-        for cluster in tqdm(raw_clusters):
-            for record in cluster['records']:
-                # To-Do: Normalize structure of clusters
-                if schema_org_class == 'product':
-                    table = record['table_id'].lower().split('_')[1]
-                elif schema_org_class == 'localbusiness':
-                    table = record[1].lower().split('_')[1]
-                else:
-                    raise ValueError('Schema Org class {} is unknown'.format(schema_org_class))
-                if table[:3] not in clusters:
-                    clusters[table[:3]] = {}
-
-                if table not in clusters[table[:3]]:
-                    clusters[table[:3]][table] = {}
-
-                if schema_org_class == 'product':
-                    row_id = record['row_id']
-                elif schema_org_class == 'localbusiness':
-                    row_id = record[2]
-                if row_id not in clusters[table[:3]][table]:
-                    clusters[table[:3]][table][row_id] = cluster['cluster_id']
-                    no_clustered_records += 1
-
-    if with_clusters:
-        logger.info('Found {} clustered records'.format(no_clustered_records))
     # Load data into one index:
     #  1. Index with a fixed schema (Schema is based on Schema.org)
     entity_index = 0
     mapping = load_es_index_configuration(tokenizer)
-    entity_index_name = determine_es_index_name(schema_org_class, tokenizer=tokenizer, clusters=with_clusters)
+    entity_index_name = determine_es_index_name(dataset, tokenizer=tokenizer)
 
     #time.sleep(5)
     if no_test:
@@ -95,7 +53,7 @@ def load_data(schema_org_class, worker, tokenizer, no_test, with_clusters, with_
     # Collect statistics about added/ not added entities & tables
     index_statistics = {'tables_added': 0, 'tables_not_added': 0, 'entities_added': 0, 'entities_not_added': 0}
 
-    directory = '{}/corpus/{}'.format(os.environ['DATA_DIR'], schema_org_class)
+    directory = '{}/corpus/{}'.format(os.environ['DATA_DIR'], dataset)
 
     # Prepare parallel processing
     results = []
@@ -116,23 +74,23 @@ def load_data(schema_org_class, worker, tokenizer, no_test, with_clusters, with_
         collected_filenames.append(filename)
         if len(collected_filenames) > 50:
             if worker == 0:
-                results.append(create_table_index_action(directory, collected_filenames, entity_index_name, schema_org_class,
+                results.append(create_table_index_action(directory, collected_filenames, entity_index_name, dataset,
                                                          clusters, with_language_detection, duplicate_check, entity_length_check))
             else:
                 results.append(
                     pool.apply_async(create_table_index_action, (directory, collected_filenames, entity_index_name,
-                                                                 schema_org_class, clusters, with_language_detection,
+                                                                 dataset, clusters, with_language_detection,
                                                                  duplicate_check, entity_length_check,)))
             collected_filenames = []
 
     if len(collected_filenames) > 0:
         if worker == 0:
-            results.append(create_table_index_action(directory, collected_filenames, entity_index_name, schema_org_class,
+            results.append(create_table_index_action(directory, collected_filenames, entity_index_name, dataset,
                                                      clusters, with_language_detection, duplicate_check, entity_length_check))
         else:
             results.append(
                  pool.apply_async(create_table_index_action, (directory, collected_filenames, entity_index_name,
-                                                              schema_org_class, clusters, with_language_detection,
+                                                              dataset, clusters, with_language_detection,
                                                               duplicate_check, entity_length_check,)))
 
     pbar = tqdm(total=len(results))
@@ -199,12 +157,12 @@ def send_actions_to_elastic(_es, results, entity_index, index_statistics, pbar, 
     return results, entity_index
 
 
-def create_table_index_action(directory, files, entity_index, schema_org_class, clusters, with_language_detection, duplicate_check, entity_length_check):
+def create_table_index_action(directory, files, entity_index, dataset, clusters, with_language_detection, duplicate_check, entity_length_check):
     """Creates entity document that will be index to elastic search"""
     log_format = '%(asctime)s - subprocess - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_format)
     logger = logging.getLogger()
-    entity_serializer = EntitySerializer(schema_org_class)
+    entity_serializer = EntitySerializer(dataset)
     if with_language_detection:
         ld = LanguageDetector()
 
@@ -247,7 +205,7 @@ def create_table_index_action(directory, files, entity_index, schema_org_class, 
                             index_statistics['entities_not_added'] += 1
 
                         else:
-                            entity = extract_entity(raw_entity, schema_org_class)
+                            entity = extract_entity(raw_entity, dataset)
                             # Determine duplicates based on entity values without description
                             entity_wo_description = entity.copy()
                             if 'description' in entity_wo_description:

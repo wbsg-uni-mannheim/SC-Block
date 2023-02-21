@@ -30,17 +30,17 @@ pipelines:
 
     - name: 'ditto_re_ranker'
       # Supply only one cross encoder for now!
-      model_name: 'roberta_40_epochs_256_max_len/Textual/Abt-Buy'
+      model_name: 'roberta_40_epochs_256_max_len/Textual/abt-buy'
       base_model: 'roberta'
       matcher: True
       max_len: 256
       ditto_config:
-        name: 'Abt-Buy'
+        name: 'abt-buy'
         summarizer: True
         dk_injector: 'product'
-        trainset: 'src/finetuning/open_book/ditto/data/er_magellan/Textual/Abt-Buy/train.txt'
-        validset: 'src/finetuning/open_book/ditto/data/er_magellan/Textual/Abt-Buy/valid.txt'
-        testset: 'src/finetuning/open_book/ditto/data/er_magellan/Textual/Abt-Buy/test.txt'
+        trainset: 'src/finetuning/open_book/ditto/data/er_magellan/Textual/abt-buy/train.txt'
+        validset: 'src/finetuning/open_book/ditto/data/er_magellan/Textual/abt-buy/valid.txt'
+        testset: 'src/finetuning/open_book/ditto/data/er_magellan/Textual/abt-buy/test.txt'
 
     - name: 'supcon_re_ranker'
       # Supply only one cross encoder for now!

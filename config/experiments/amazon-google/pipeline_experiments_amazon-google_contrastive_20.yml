@@ -38,17 +38,17 @@ pipelines:
 
     - name: 'ditto_re_ranker'
       # Supply only one cross encoder for now!
-      model_name: 'roberta_40_epochs_256_max_len/Structured/Amazon-Google'
+      model_name: 'roberta_40_epochs_256_max_len/Structured/amazon-google'
       base_model: 'roberta'
       matcher: True
       max_len: 256
       ditto_config:
-        name: 'Amazon-Google'
+        name: 'amazon-google'
         summarizer: True
         dk_injector: 'product'
-        trainset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/Amazon-Google/train.txt'
-        validset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/Amazon-Google/valid.txt'
-        testset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/Amazon-Google/test.txt'
+        trainset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/amazon-google/train.txt'
+        validset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/amazon-google/valid.txt'
+        testset: 'src/finetuning/open_book/ditto/data/er_magellan/Structured/amazon-google/test.txt'
     #
     #
     - name: 'supcon_re_ranker'
