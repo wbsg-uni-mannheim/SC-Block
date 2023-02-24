@@ -19,8 +19,8 @@ def preprocess_dataset(arg_tuple):
     
     print(f'BUILDING {handle} TRAIN, VALID, GS...')
     
-    left_df = pd.read_csv(f'../../../data/raw/{handle}/tableA.csv', engine='python')
-    right_df = pd.read_csv(f'../../../data/raw/{handle}/tableB.csv', engine='python')
+    left_df = pd.read_csv(f'src/finetuning/open_book/contrastive_pretraining/data/raw/{handle}/tableA.csv', engine='python')
+    right_df = pd.read_csv(f'src/finetuning/open_book/contrastive_pretraining/data/raw/{handle}/tableB.csv', engine='python')
     
     left_df['id'] = f'{id_handle_left}_' +  left_df['id'].astype(str)
     right_df['id'] = f'{id_handle_right}_' +  right_df['id'].astype(str)
@@ -30,9 +30,9 @@ def preprocess_dataset(arg_tuple):
     left_df = left_df.fillna('')
     right_df = right_df.fillna('')
 
-    train = pd.read_csv(f'../../../data/raw/{handle}/train.csv')
-    test = pd.read_csv(f'../../../data/raw/{handle}/test.csv')
-    valid = pd.read_csv(f'../../../data/raw/{handle}/valid.csv')
+    train = pd.read_csv(f'src/finetuning/open_book/contrastive_pretraining/data/raw/{handle}/train.csv')
+    test = pd.read_csv(f'src/finetuning/open_book/contrastive_pretraining/data/raw/{handle}/test.csv')
+    valid = pd.read_csv(f'src/finetuning/open_book/contrastive_pretraining/data/raw/{handle}/valid.csv')
     
     full = train.append(valid, ignore_index=True).append(test, ignore_index=True)
     full = full[full['label'] == 1]
@@ -115,11 +115,11 @@ def preprocess_dataset(arg_tuple):
     print(f'Distribution of training set labels: \n{train_df["label"].value_counts()}')
     print(f'Distribution of gold standard labels: \n{gs_df["label"].value_counts()}')
     
-    os.makedirs(os.path.dirname(f'../../../data/interim/{handle}/'), exist_ok=True)
+    os.makedirs(os.path.dirname(f'src/finetuning/open_book/contrastive_pretraining/data/interim/{handle}/'), exist_ok=True)
 
-    train_df.to_json(f'../../../data/interim/{handle}/{handle}-train.json.gz', compression='gzip', lines=True, orient='records')
-    valid['pair_id'].to_csv(f'../../../data/interim/{handle}/{handle}-valid.csv', header=True, index=False)
-    gs_df.to_json(f'../../../data/interim/{handle}/{handle}-gs.json.gz', compression='gzip', lines=True, orient='records')
+    train_df.to_json(f'src/finetuning/open_book/contrastive_pretraining/data/interim/{handle}/{handle}-train.json.gz', compression='gzip', lines=True, orient='records')
+    valid['pair_id'].to_csv(f'src/finetuning/open_book/contrastive_pretraining/data/interim/{handle}/{handle}-valid.csv', header=True, index=False)
+    gs_df.to_json(f'src/finetuning/open_book/contrastive_pretraining/data/interim/{handle}/{handle}-gs.json.gz', compression='gzip', lines=True, orient='records')
 
     print(f'FINISHED BULDING {handle} DATASETS\n')
 
@@ -128,11 +128,8 @@ if __name__ == '__main__':
     datasets = [
         ('abt-buy', 'abt', 'buy'),
         ('amazon-google', 'amazon', 'google'),
-        ('dblp-acm', 'dblp', 'acm'),
-        ('dblp-googlescholar', 'dblp', 'googlescholar'),
         ('walmart-amazon', 'walmart', 'amazon'),
-        ('wdcproducts80cc20rnd050un', 'tablea', 'tableb'),
-        ('wdcproducts80cc20rnd000un', 'tablea', 'tableb')
+        ('wdc-b', 'tablea', 'tableb')
     ]
     for dataset in datasets:
         preprocess_dataset(dataset)

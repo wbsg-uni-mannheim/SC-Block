@@ -5,8 +5,8 @@ import pandas as pd
 
 def convert_ids_of_datasets():
     # Load the dataframe
-    df_tab_a = pd.read_csv('/ceph/alebrink/deepblocker/data/wdcproducts80cc20rnd050un/tableA.csv')
-    df_tab_b = pd.read_csv('/ceph/alebrink/deepblocker/data/wdcproducts80cc20rnd050un/tableB.csv')
+    df_tab_a = pd.read_csv('/ceph/alebrink/deepblocker/data/wdc-b/tableA.csv')
+    df_tab_b = pd.read_csv('/ceph/alebrink/deepblocker/data/wdc-b/tableB.csv')
 
     # Create a new column with increasing numbers starting at one
     df_tab_a['new_id'] = range(0, len(df_tab_a))
@@ -25,7 +25,7 @@ def convert_ids_of_datasets():
 
     # Update mapping in train, validation & test
     # Update the ltable_id column using the id_mapping dictionary
-    df_train = pd.read_csv('/ceph/alebrink/deepblocker/data/wdcproducts80cc20rnd050un/train.csv')
+    df_train = pd.read_csv('/ceph/alebrink/deepblocker/data/wdc-b/train.csv')
     df_train['ltable_id'] = df_train['ltable_id'].map(id_mapping_a)
     df_train['rtable_id'] = df_train['rtable_id'].map(id_mapping_b)
 
@@ -33,14 +33,14 @@ def convert_ids_of_datasets():
     # Save the updated dataframe
     df_train.to_csv('/ceph/alebrink/deepblocker/data/wdcproducts80cc20rnd050un_new_mapping/train.csv', index=False)
 
-    df_valid = pd.read_csv('/ceph/alebrink/deepblocker/data/wdcproducts80cc20rnd050un/valid.csv')
+    df_valid = pd.read_csv('/ceph/alebrink/deepblocker/data/wdc-b/valid.csv')
     df_valid['ltable_id'] = df_valid['ltable_id'].map(id_mapping_a)
     df_valid['rtable_id'] = df_valid['rtable_id'].map(id_mapping_b)
 
     # Save the updated dataframe
     df_valid.to_csv('/ceph/alebrink/deepblocker/data/wdcproducts80cc20rnd050un_new_mapping/valid.csv', index=False)
 
-    df_test = pd.read_csv('/ceph/alebrink/deepblocker/data/wdcproducts80cc20rnd050un/test.csv')
+    df_test = pd.read_csv('/ceph/alebrink/deepblocker/data/wdc-b/test.csv')
     df_test['ltable_id'] = df_test['ltable_id'].map(id_mapping_a)
     df_test['rtable_id'] = df_test['rtable_id'].map(id_mapping_b)
 

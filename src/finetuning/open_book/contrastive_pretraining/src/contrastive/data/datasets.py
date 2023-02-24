@@ -242,7 +242,7 @@ class ContrastivePretrainDataset(torch.utils.data.Dataset):
         elif self.dataset == 'walmart-amazon':
             data['features'] = data.apply(serialize_sample_walmartamazon, axis=1)
 
-        elif self.dataset == 'wdcproducts80cc20rnd050un':
+        elif self.dataset == 'wdc-b':
             data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
 
         elif self.dataset == 'wdcproducts80cc20rnd000un':
@@ -333,7 +333,7 @@ class ContrastivePretrainDatasetSSV(torch.utils.data.Dataset):
         elif self.dataset == 'wdcproducts80cc20rnd000un':
             data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
 
-        elif self.dataset == 'wdcproducts80cc20rnd050un':
+        elif self.dataset == 'wdc-b':
             data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
 
         # label_enc = LabelEncoder()
@@ -346,7 +346,7 @@ class ContrastivePretrainDatasetSSV(torch.utils.data.Dataset):
         return data
 
 
-# Dataset class for Contrastive Pre-training for Abt-Buy and Amazon-Google
+# Dataset class for Contrastive Pre-training for abt-buy and amazon-google
 # builds correspondence graph from train+val and builds source-aware sampling datasets
 # if split=False, corresponds to not using source-aware sampling
 class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
@@ -381,8 +381,8 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
                 val = pd.read_csv('../../data/interim/dblp-googlescholar/dblp-googlescholar-valid.csv')
             elif dataset == 'walmart-amazon':
                 val = pd.read_csv('../../data/interim/walmart-amazon/walmart-amazon-valid.csv')
-            elif dataset == 'wdcproducts80cc20rnd050un':
-                val = pd.read_csv('../../data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-valid.csv')
+            elif dataset == 'wdc-b':
+                val = pd.read_csv('../../data/interim/wdc-b/wdc-b-valid.csv')
             elif dataset == 'wdcproducts80cc20rnd000un':
                 val = pd.read_csv('../../data/interim/wdcproducts80cc20rnd000un/wdcproducts80cc20rnd000un-valid.csv')
 
@@ -456,7 +456,7 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
             elif dataset == 'walmart-amazon':
                 left_index = [x for x in index if 'walmart' in x]
                 right_index = [x for x in index if 'amazon' in x]
-            elif dataset == 'wdcproducts80cc20rnd050un':
+            elif dataset == 'wdc-b':
                 left_index = [x for x in index if 'tablea' in x]
                 right_index = [x for x in index if 'tableb' in x]
             elif dataset == 'wdcproducts80cc20rnd000un':
@@ -598,7 +598,7 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
         elif self.dataset == 'walmart-amazon':
             data['features'] = data.apply(serialize_sample_walmartamazon, axis=1)
 
-        elif self.dataset == 'wdcproducts80cc20rnd050un':
+        elif self.dataset == 'wdc-b':
             data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
 
         elif self.dataset == 'wdcproducts80cc20rnd000un':
@@ -649,8 +649,8 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
                 validation_ids = pd.read_csv('../../data/interim/dblp-googlescholar/dblp-googlescholar-valid.csv')
             elif dataset == 'walmart-amazon':
                 validation_ids = pd.read_csv('../../data/interim/walmart-amazon/walmart-amazon-valid.csv')
-            elif dataset == 'wdcproducts80cc20rnd050un':
-                validation_ids = pd.read_csv('../../data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-valid.csv')
+            elif dataset == 'wdc-b':
+                validation_ids = pd.read_csv('../../data/interim/wdc-b/wdc-b-valid.csv')
             elif dataset == 'wdcproducts80cc20rnd000un':
                 validation_ids = pd.read_csv('../../data/interim/wdcproducts80cc20rnd000un/wdcproducts80cc20rnd000un-valid.csv')
 
@@ -703,7 +703,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         elif self.dataset == 'walmart-amazon':
             data['features_left'] = data.apply(self.serialize_sample_walmartamazon, args=('left',), axis=1)
             data['features_right'] = data.apply(self.serialize_sample_walmartamazon, args=('right',), axis=1)
-        elif self.dataset == 'wdcproducts80cc20rnd050un':
+        elif self.dataset == 'wdc-b':
             data['features_left'] = data.apply(self.serialize_sample_wdcproduct, args=('left',), axis=1)
             data['features_right'] = data.apply(self.serialize_sample_wdcproduct, args=('right',), axis=1)
         elif self.dataset == 'wdcproducts80cc20rnd000un':

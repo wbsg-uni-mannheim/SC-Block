@@ -75,7 +75,7 @@ def convert_table_to_query_table(dataset, table_name):
                        'itunes-amazon_2': 17000,
                        'walmart-amazon_1': 18000,
                        'walmart-amazon_2': 19000,
-                       'wdcproducts80cc20rnd050un': 20000,
+                       'wdc-b': 20000,
                        'wdcproducts80cc20rnd000un': 21000,
                        'wdcproducts80cc20rnd100un': 22000}
 

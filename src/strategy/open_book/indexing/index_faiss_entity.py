@@ -16,7 +16,7 @@ from src.strategy.open_book.retrieval.query_by_entity import QueryByEntity
 
 @click.command()
 @click.option('--path_to_config')
-@click.option('--schema_org_class')
+@click.option('--dataset')
 @click.option('--bi_encoder_name')
 @click.option('--model_name')
 @click.option('--base_model')
@@ -26,7 +26,7 @@ from src.strategy.open_book.retrieval.query_by_entity import QueryByEntity
 @click.option('--dimensions', type=int)
 @click.option('--clusters', default=False)
 @click.option('--batch_size', default= 512)
-def load_data(path_to_config, schema_org_class, bi_encoder_name, model_name, base_model, with_projection, pooling, similarity_measure, dimensions, clusters, batch_size):
+def load_data(path_to_config, dataset, bi_encoder_name, model_name, base_model, with_projection, pooling, similarity_measure, dimensions, clusters, batch_size):
     logger = logging.getLogger()
 
     if path_to_config is not None:
@@ -34,7 +34,7 @@ def load_data(path_to_config, schema_org_class, bi_encoder_name, model_name, bas
         with open(path_to_config) as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
         # validate_configuration(config) --> To-Do: Implement proper validation
-        schema_org_class = config['general']['schema_org_class']
+        dataset = config['general']['dataset']
         model_name = config['bi_encoder_configuration']['model_name']
         batch_size = config['general']['indexing_batch_size']
         pooling = config['bi_encoder_configuration']['pooling']
@@ -49,20 +49,20 @@ def load_data(path_to_config, schema_org_class, bi_encoder_name, model_name, bas
                                     'normalize': True, similarity_measure: similarity_measure,
                                     'dimensions': dimensions }
 
-    logger.info('Chosen Model {} for indexing schema org class {}'.format(model_name, schema_org_class))
+    logger.info('Chosen Model {} for indexing schema org class {}'.format(model_name, dataset))
 
     start_time = time.time()
 
-    strategy = QueryByEntity(schema_org_class)
+    strategy = QueryByEntity(dataset)
 
     _es = Elasticsearch([{'host': os.environ['ES_INSTANCE'], 'port': 9200}])
-    entity_index_name = determine_es_index_name(schema_org_class, clusters=clusters)
+    entity_index_name = determine_es_index_name(dataset, clusters=clusters)
     logger.info('Create FAISS index for ES index {}'.format(entity_index_name))
     no_entities = int(_es.cat.count(entity_index_name, params={"format": "json"})[0]['count'])
     final_step = int(no_entities / batch_size) + 1
 
     # Initialize Faiss collector - TO-DO: Move configuration to yaml file!
-    faiss_collector = FaissIndexCollector(schema_org_class, model_name, pooling, similarity_measure, final_step,
+    faiss_collector = FaissIndexCollector(dataset, model_name, pooling, similarity_measure, final_step,
                                           dimensions, clusters)
 
     input_q = Queue()
@@ -79,7 +79,7 @@ def load_data(path_to_config, schema_org_class, bi_encoder_name, model_name, bas
         for i in range(0,2):
             # Start multiple processes - 1 per GPU
             p = Process(target=generate_embeddings,
-                        args=(bi_encoder_configuration, schema_org_class, input_q, output_q, gpu_n,))
+                        args=(bi_encoder_configuration, dataset, input_q, output_q, gpu_n,))
             p.start()
             processes.append(p)
 
@@ -100,7 +100,7 @@ def load_data(path_to_config, schema_org_class, bi_encoder_name, model_name, bas
         entities = [entity['_source'] for entity in entities['hits']['hits']]
 
         # logger.info('Start batch processing for entities!')
-        # generate_embeddings(model_name, schema_org_class, entities)
+        # generate_embeddings(model_name, dataset, entities)
         input_q.put((i, entities))
 
         # Collect results
@@ -139,13 +139,13 @@ def load_data(path_to_config, schema_org_class, bi_encoder_name, model_name, bas
     logger.info('Indexing time: {}'.format(indexing_time))
 
 
-def generate_embeddings(bi_encoder_configuration, schema_org_class, input_q, output_q, gpu_n):
+def generate_embeddings(bi_encoder_configuration, dataset, input_q, output_q, gpu_n):
     """Generate embeddings of entities"""
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_n)
 
     # Initialize Bi-Encoder
-    bi_encoder = select_bi_encoder(bi_encoder_configuration, schema_org_class)
+    bi_encoder = select_bi_encoder(bi_encoder_configuration, dataset)
     if bi_encoder_configuration['normalize']:
         collection_identifier = 'entity_vector_{}_norm'.format(bi_encoder_configuration['pooling'])
     else:
@@ -167,7 +167,7 @@ def generate_embeddings(bi_encoder_configuration, schema_org_class, input_q, out
         output_q.put((i, entities))
 
 
-def generate_dummy_embeddings(model_name, schema_org_class, input_q, output_q):
+def generate_dummy_embeddings(model_name, dataset, input_q, output_q):
     """Generate dummy embeddings of for testing purposes"""
 
     # Initialize Bi-Encoder

@@ -36,12 +36,12 @@ def convert_table_corpus_to_table_b(path_to_table_corpus):
     return df
 
 # Load the pickled pandas DataFrame
-df_train = pd.read_pickle("/home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/processed/wdcproducts80cc20rnd050un/contrastive/wdcproducts80cc20rnd050un-train.pkl.gz")
+df_train = pd.read_pickle("/home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/processed/wdc-b/contrastive/wdc-b-train.pkl.gz")
 
-df_additional_data = convert_table_corpus_to_table_b('/ceph/alebrink/tableAugmentation/data/corpus/wdcproducts80cc20rnd050un')
+df_additional_data = convert_table_corpus_to_table_b('/ceph/alebrink/tableAugmentation/data/corpus/wdc-b')
 
 df_additional_data['id'] = 'tableb_' + df_additional_data['id'].astype(str)
 
 df_train = pd.concat([df_train, df_additional_data])
 
-df_train.to_pickle("/home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/processed/wdcproducts80cc20rnd050un/contrastive/wdcproducts80cc20rnd050un-additionaldata-train.pkl.gz")
+df_train.to_pickle("/home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/processed/wdc-b/contrastive/wdc-b-additionaldata-train.pkl.gz")

@@ -30,7 +30,7 @@ def convert_table_corpus_to_table_b(path_to_table_corpus):
     df['description'] = df['description'].str[:200]
     print(df.columns)
     df = df[['id', 'brand', 'title', 'description', 'price', 'pricecurrency', 'spectablecontent', 'cluster_id']]
-    output_path = '/ceph/alebrink/tableAugmentation/data/deepmatcher/wdcproducts80cc20rnd050un/tableB.csv'
+    output_path = '/ceph/alebrink/tableAugmentation/data/deepmatcher/wdc-b/tableB.csv'
     df.to_csv(path_or_buf=output_path, sep=',', index=False)
 
 

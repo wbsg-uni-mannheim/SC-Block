@@ -64,7 +64,7 @@ class DataCollatorContrastivePretrain:
 
         return batch
 
-# collator for supervised contrastive pre-training for Abt-Buy and Amazon-Google
+# collator for supervised contrastive pre-training for abt-buy and amazon-google
 # randomly chooses the sampling dataset when using source-aware sampling
 @dataclass
 class DataCollatorContrastivePretrainDeepmatcher:
@@ -98,7 +98,7 @@ class DataCollatorContrastivePretrainDeepmatcher:
         return batch
 
 
-# collator for supervised contrastive pre-training for Abt-Buy and Amazon-Google
+# collator for supervised contrastive pre-training for abt-buy and amazon-google
 # randomly chooses the sampling dataset when using source-aware sampling
 @dataclass
 class DataCollatorContrastivePretrainDeepmatcherSSV:
