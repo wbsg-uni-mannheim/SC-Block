@@ -1,6 +1,11 @@
 # DeepBlocker adjusted to run within in the framework of SC-Block
 
-DeepBlocker is a Python package for performing blocking for entity matching using deep learning. It provides functionalities for transforming tuples into embeddings customized for blocking. Given these tuple embeddings, DeepBlocker also provides various utilities to retrieve similar tuples and construct the candidate set efficiently. DeepBlocker is self-supervised and does not require any labeled data. DeepBlocker provides multiple instantiations for tuple embedding  and vector pairing for performing blocking. It is also modular and easily customizable. Each of the subcomponent is based on a pre-defined and intuitive API that allows altering and swapping up these components to achieve bespoke implementations.  
+DeepBlocker is a Python package for performing blocking for entity matching using deep learning. 
+It provides functionalities for transforming tuples into embeddings customized for blocking. 
+Given these tuple embeddings, DeepBlocker also provides various utilities to retrieve similar tuples and construct the candidate set efficiently. 
+DeepBlocker is self-supervised and does not require any labeled data. DeepBlocker provides multiple instantiations for tuple embedding  and vector pairing for performing blocking. 
+It is also modular and easily customizable. Each of the subcomponent is based on a pre-defined and intuitive API that allows altering and swapping up these components to achieve bespoke implementations.
+
 
 # Paper and Data
 
