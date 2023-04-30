@@ -1,8 +1,7 @@
 """
-Run contrastive pre-training
+Run contrastive pre-training self-supervised
 """
 import numpy as np
-
 np.random.seed(42)
 import random
 random.seed(42)
@@ -29,11 +28,10 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-#from src.contrastive.models.modeling import ContrastivePretrainModel
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.modeling import ContrastivePretrainModel
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDataset
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastivePretrain
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.modeling import ContrastiveSelfSupervisedPretrainModel
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDataset
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastivePretrainSelfSupervised
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
 
 from transformers import EarlyStoppingCallback
 
@@ -56,10 +54,10 @@ class ModelArguments:
         default=None, metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
     )
     do_param_opt: Optional[bool] = field(
-        default=False, metadata={"help": "If you want to do hyperparameter optimization"}
+        default=False, metadata={"help": "If aou want to do hyperparamter optimization"}
     )
     grad_checkpoint: Optional[bool] = field(
-        default=True, metadata={"help": "If you want to use gradient checkpointing"}
+        default=True, metadata={"help": "If aou want to use gradient checkpointing"}
     )
     temperature: Optional[float] = field(
         default=0.07,
@@ -89,14 +87,11 @@ class DataTrainingArguments:
     only_interm: Optional[bool] = field(
         default=False, metadata={"help": "Only use intermediate training set"}
     )
-    clean: Optional[bool] = field(
-        default=False, metadata={"help": "Only use intermediate training set"}
+    id_deduction_set: Optional[str] = field(
+        default=None, metadata={"help": "The size of the training set."}
     )
     augment: Optional[str] = field(
         default=None, metadata={"help": "The data augmentation to use."}
-    )
-    id_deduction_set: Optional[str] = field(
-        default=None, metadata={"help": "The size of the training set."}
     )
     train_size: Optional[str] = field(
         default=None, metadata={"help": "The size of the training set."}
@@ -195,19 +190,19 @@ def main():
             raise ValueError("--do_train requires a train dataset")
         train_dataset = raw_datasets["train"]
         if data_args.interm_file is not None:
-            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, intermediate_set=data_args.interm_file, only_interm=data_args.only_interm, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
+            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, intermediate_set=data_args.interm_file, only_interm=data_args.only_interm, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
         else:
-            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, only_interm=data_args.only_interm, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
+            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, only_interm=data_args.only_interm, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
 
     # Data collator
-    data_collator = DataCollatorContrastivePretrain(tokenizer=train_dataset.tokenizer)
+    data_collator = DataCollatorContrastivePretrainSelfSupervised(tokenizer=train_dataset.tokenizer)
 
     if model_args.model_pretrained_checkpoint:
-        model = ContrastivePretrainModel(model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, temperature=model_args.temperature)
+        model = ContrastiveSelfSupervisedPretrainModel(model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, temperature=model_args.temperature)
         if model_args.grad_checkpoint:
             model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
     else:
-        model = ContrastivePretrainModel(len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, temperature=model_args.temperature)
+        model = ContrastiveSelfSupervisedPretrainModel(len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, temperature=model_args.temperature)
         if model_args.grad_checkpoint:
             model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
 

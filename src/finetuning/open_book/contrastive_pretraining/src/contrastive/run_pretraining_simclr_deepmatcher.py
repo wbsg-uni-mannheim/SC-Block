@@ -1,9 +1,11 @@
 """
-Run contrastive pre-training self-supervised
+Run contrastive pre-training
 """
 import numpy as np
+
 np.random.seed(42)
 import random
+
 random.seed(42)
 
 import logging
@@ -23,15 +25,18 @@ from transformers import (
     TrainingArguments,
     set_seed
 )
+
 from transformers.file_utils import is_offline_mode
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-from src.contrastive.models.modeling import ContrastiveSelfSupervisedPretrainModel
-from src.contrastive.data.datasets import ContrastivePretrainDataset
-from src.contrastive.data.data_collators import DataCollatorContrastivePretrainSelfSupervised
-from src.contrastive.models.metrics import compute_metrics_bce
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.modeling import \
+    ContrastiveSelfSupervisedPretrainModel
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDatasetSSV
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.data_collators import \
+    DataCollatorContrastivePretrainDeepmatcherSSV
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
 
 from transformers import EarlyStoppingCallback
 
@@ -42,7 +47,8 @@ check_min_version("4.8.2")
 
 logger = logging.getLogger(__name__)
 
-MODEL_PARAMS=['pool']
+MODEL_PARAMS = ['pool']
+
 
 @dataclass
 class ModelArguments:
@@ -72,6 +78,7 @@ class ModelArguments:
         },
     )
 
+
 @dataclass
 class DataTrainingArguments:
     """
@@ -84,14 +91,14 @@ class DataTrainingArguments:
     interm_file: Optional[str] = field(
         default=None, metadata={"help": "The intermediate training set."}
     )
-    only_interm: Optional[bool] = field(
+    clean: Optional[bool] = field(
         default=False, metadata={"help": "Only use intermediate training set"}
-    )
-    id_deduction_set: Optional[str] = field(
-        default=None, metadata={"help": "The size of the training set."}
     )
     augment: Optional[str] = field(
         default=None, metadata={"help": "The data augmentation to use."}
+    )
+    id_deduction_set: Optional[str] = field(
+        default=None, metadata={"help": "The size of the training set."}
     )
     train_size: Optional[str] = field(
         default=None, metadata={"help": "The size of the training set."}
@@ -100,21 +107,21 @@ class DataTrainingArguments:
         default=None,
         metadata={
             "help": "For debugging purposes or quicker training, truncate the number of training examples to this "
-            "value if set."
+                    "value if set."
         },
     )
     validation_file: Optional[str] = field(
         default=None,
         metadata={
             "help": "An optional input evaluation data file to evaluate the metrics (rouge) on "
-            "(a jsonlines or csv file)."
+                    "(a jsonlines or csv file)."
         },
     )
     max_validation_samples: Optional[int] = field(
         default=None,
         metadata={
             "help": "For debugging purposes or quicker training, truncate the number of validation examples to this "
-            "value if set."
+                    "value if set."
         },
     )
     test_file: Optional[str] = field(
@@ -127,24 +134,23 @@ class DataTrainingArguments:
         default=None,
         metadata={
             "help": "For debugging purposes or quicker training, truncate the number of test examples to this "
-            "value if set."
+                    "value if set."
         },
     )
     dataset_name: Optional[str] = field(
         default='lspc',
         metadata={
             "help": "An optional input evaluation data file to evaluate the metrics (rouge) on "
-            "(a jsonlines or csv file)."
+                    "(a jsonlines or csv file)."
         },
     )
+
     def __post_init__(self):
         if self.train_file is None and self.validation_file is None:
             raise ValueError("Need a training file.")
 
 
-
 def main():
-
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
 
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
@@ -190,21 +196,35 @@ def main():
             raise ValueError("--do_train requires a train dataset")
         train_dataset = raw_datasets["train"]
         if data_args.interm_file is not None:
-            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, intermediate_set=data_args.interm_file, only_interm=data_args.only_interm, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
+            train_dataset = ContrastivePretrainDatasetSSV(train_dataset, tokenizer=model_args.tokenizer,
+                                                          intermediate_set=data_args.interm_file,
+                                                          clean=data_args.clean,
+                                                          dataset=data_args.dataset_name,
+                                                          deduction_set=data_args.id_deduction_set,
+                                                          aug=data_args.augment)
         else:
-            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, only_interm=data_args.only_interm, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
+            train_dataset = ContrastivePretrainDatasetSSV(train_dataset, tokenizer=model_args.tokenizer,
+                                                          clean=data_args.clean,
+                                                          dataset=data_args.dataset_name,
+                                                          deduction_set=data_args.id_deduction_set,
+                                                          aug=data_args.augment)
 
     # Data collator
-    data_collator = DataCollatorContrastivePretrainSelfSupervised(tokenizer=train_dataset.tokenizer)
+    data_collator = DataCollatorContrastivePretrainDeepmatcherSSV(tokenizer=train_dataset.tokenizer)
 
     if model_args.model_pretrained_checkpoint:
-        model = ContrastiveSelfSupervisedPretrainModel(model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, temperature=model_args.temperature)
+        model = ContrastiveSelfSupervisedPretrainModel(model_args.model_pretrained_checkpoint,
+                                                       len_tokenizer=len(train_dataset.tokenizer),
+                                                       model=model_args.tokenizer, temperature=model_args.temperature)
         if model_args.grad_checkpoint:
             model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
     else:
-        model = ContrastiveSelfSupervisedPretrainModel(len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, temperature=model_args.temperature)
+        model = ContrastiveSelfSupervisedPretrainModel(len_tokenizer=len(train_dataset.tokenizer),
+                                                       model=model_args.tokenizer, temperature=model_args.temperature)
         if model_args.grad_checkpoint:
             model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
+
+    callback = EarlyStoppingCallback(early_stopping_patience=10)
 
     # Initialize our Trainer
     trainer = Trainer(
@@ -212,8 +232,9 @@ def main():
         args=training_args,
         train_dataset=train_dataset if training_args.do_train else None,
         eval_dataset=validation_dataset if training_args.do_eval else None,
-        data_collator=data_collator,
-        compute_metrics=compute_metrics_bce
+        data_collator=data_collator
+        # compute_metrics=compute_metrics_bce,
+        # callbacks=[callback]
     )
     trainer.args.save_total_limit = 1
 
@@ -227,6 +248,7 @@ def main():
             checkpoint = last_checkpoint
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         trainer.save_model()  # Saves the tokenizer too for easy upload
+        train_dataset.tokenizer.save_pretrained(training_args.output_dir)
 
         metrics = train_result.metrics
         max_train_samples = (
@@ -237,6 +259,7 @@ def main():
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
         trainer.save_state()
+
 
 if __name__ == "__main__":
     main()

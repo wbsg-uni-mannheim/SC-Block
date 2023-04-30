@@ -2,6 +2,7 @@
 Run contrastive pre-training
 """
 import numpy as np
+
 np.random.seed(42)
 import random
 random.seed(42)
@@ -23,16 +24,16 @@ from transformers import (
     TrainingArguments,
     set_seed
 )
-
 from transformers.file_utils import is_offline_mode
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.modeling import ContrastivePretrainModel
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDatasetDeepmatcher
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastivePretrainDeepmatcher
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
+#from src.contrastive.models.modeling import ContrastivePretrainModel
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.modeling import ContrastivePretrainModel
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDataset
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastivePretrain
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
 
 from transformers import EarlyStoppingCallback
 
@@ -55,10 +56,10 @@ class ModelArguments:
         default=None, metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
     )
     do_param_opt: Optional[bool] = field(
-        default=False, metadata={"help": "If aou want to do hyperparamter optimization"}
+        default=False, metadata={"help": "If you want to do hyperparameter optimization"}
     )
     grad_checkpoint: Optional[bool] = field(
-        default=True, metadata={"help": "If aou want to use gradient checkpointing"}
+        default=True, metadata={"help": "If you want to use gradient checkpointing"}
     )
     temperature: Optional[float] = field(
         default=0.07,
@@ -84,6 +85,9 @@ class DataTrainingArguments:
     )
     interm_file: Optional[str] = field(
         default=None, metadata={"help": "The intermediate training set."}
+    )
+    only_interm: Optional[bool] = field(
+        default=False, metadata={"help": "Only use intermediate training set"}
     )
     clean: Optional[bool] = field(
         default=False, metadata={"help": "Only use intermediate training set"}
@@ -191,40 +195,12 @@ def main():
             raise ValueError("--do_train requires a train dataset")
         train_dataset = raw_datasets["train"]
         if data_args.interm_file is not None:
-            if "validation" in raw_datasets:
-                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer,
-                                                                      intermediate_set=data_args.interm_file,
-                                                                      clean=data_args.clean,
-                                                                      dataset=data_args.dataset_name,
-                                                                      deduction_set=data_args.id_deduction_set,
-                                                                      aug=data_args.augment, dataset_type='train', split=False)
-                validation_dataset = ContrastivePretrainDatasetDeepmatcher(raw_datasets["validation"], tokenizer=model_args.tokenizer,
-                                                                      intermediate_set=data_args.interm_file,
-                                                                      clean=data_args.clean,
-                                                                      dataset=data_args.dataset_name,
-                                                                      deduction_set=data_args.id_deduction_set,
-                                                                      aug=data_args.augment, dataset_type='valid', split=False)
-            else:
-                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer, intermediate_set=data_args.interm_file, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment, split=False)
+            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, intermediate_set=data_args.interm_file, only_interm=data_args.only_interm, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
         else:
-            if "validation" in raw_datasets:
-                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer,
-                                                                      clean=data_args.clean,
-                                                                      dataset=data_args.dataset_name,
-                                                                      deduction_set=data_args.id_deduction_set,
-                                                                      aug=data_args.augment, dataset_type='train')
-
-                validation_dataset = ContrastivePretrainDatasetDeepmatcher(raw_datasets["validation"], tokenizer=model_args.tokenizer,
-                                                                      clean=data_args.clean,
-                                                                      dataset=data_args.dataset_name,
-                                                                      deduction_set=data_args.id_deduction_set,
-                                                                      aug=data_args.augment, dataset_type='valid')
-
-            else:
-                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
+            train_dataset = ContrastivePretrainDataset(train_dataset, tokenizer=model_args.tokenizer, only_interm=data_args.only_interm, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment)
 
     # Data collator
-    data_collator = DataCollatorContrastivePretrainDeepmatcher(tokenizer=train_dataset.tokenizer)
+    data_collator = DataCollatorContrastivePretrain(tokenizer=train_dataset.tokenizer)
 
     if model_args.model_pretrained_checkpoint:
         model = ContrastivePretrainModel(model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, temperature=model_args.temperature)
@@ -235,17 +211,14 @@ def main():
         if model_args.grad_checkpoint:
             model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
 
-    callback = EarlyStoppingCallback(early_stopping_patience=10)
-
     # Initialize our Trainer
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset if training_args.do_train else None,
         eval_dataset=validation_dataset if training_args.do_eval else None,
-        data_collator=data_collator
-        #compute_metrics=compute_metrics_bce,
-        #callbacks=[callback]
+        data_collator=data_collator,
+        compute_metrics=compute_metrics_bce
     )
     trainer.args.save_total_limit = 1
 
@@ -259,7 +232,6 @@ def main():
             checkpoint = last_checkpoint
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         trainer.save_model()  # Saves the tokenizer too for easy upload
-        train_dataset.tokenizer.save_pretrained(training_args.output_dir)
 
         metrics = train_result.metrics
         max_train_samples = (

@@ -1,15 +1,15 @@
 """
 Run column type annotation fine-tuning
 """
-import math
-
 import numpy as np
+
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.CrossEncoderDataCollator import \
+    CrossEncoderDataCollator
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.CrossEncoderDataset import CrossEncoderDataset
+
 np.random.seed(42)
 import random
 random.seed(42)
-
-import pandas as pd
-from sklearn.metrics import classification_report
 
 import logging
 import os
@@ -20,31 +20,26 @@ import json
 
 from copy import deepcopy
 
-import torch
-
 import transformers as transformers
 
 from transformers import (
     HfArgumentParser,
     Trainer,
     TrainingArguments,
-    set_seed
+    set_seed, AutoModelForSequenceClassification
 )
-from transformers.file_utils import is_offline_mode
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
-from transformers.utils.versions import require_version
 
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.modeling import ContrastiveClassifierModel
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.datasets import ContrastiveClassificationDataset
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastiveClassification
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
+#from src.finetuning.open_book.contrastive_product_matching.src.contrastive.models.modeling import ContrastiveClassifierModel
+#from src.finetuning.open_book.contrastive_product_matching.src.contrastive.data.datasets import ContrastiveClassificationDataset
+#from src.finetuning.open_book.contrastive_product_matching.src.contrastive.data.data_collators import DataCollatorContrastiveClassification
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce, \
+    compute_metrics_soft_max
 
 from transformers import EarlyStoppingCallback
 
 from transformers.utils.hp_naming import TrialShortNamer
-
-from pdb import set_trace
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.8.2")
@@ -155,24 +150,25 @@ def main():
             elif data_args.train_size == 'xlarge':
                 return 6
 
-        # If no solution is found, calculte Pos Neg ratio
-        counts = train_dataset.data['labels'].value_counts()
-        ratio = counts[0] / counts[1]
-        return math.ceil(ratio)
-
     def model_init(trial):
         init_args = {}
         pos_neg = get_posneg()
-        if model_args.model_pretrained_checkpoint:
-            my_model = ContrastiveClassifierModel(checkpoint_path=model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
-            if model_args.grad_checkpoint:
-                my_model.encoder.transformer._set_gradient_checkpointing(my_model.encoder.transformer.encoder, True)
-            return my_model
-        else:
-            my_model = ContrastiveClassifierModel(len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
-            if model_args.grad_checkpoint:
-                my_model.encoder.transformer._set_gradient_checkpointing(my_model.encoder.transformer.encoder, True)
-            return my_model
+
+        model = AutoModelForSequenceClassification.from_pretrained(model_args.model_pretrained_checkpoint, num_labels=2)
+        model.resize_token_embeddings(len(train_dataset.tokenizer))
+        return model
+
+        # if model_args.model_pretrained_checkpoint:
+        #     my_model =
+        #     my_model = ContrastiveClassifierModel(checkpoint_path=model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
+        #     if model_args.grad_checkpoint:
+        #         my_model.encoder.transformer._set_gradient_checkpointing(my_model.encoder.transformer.encoder, True)
+        #     return my_model
+        # else:
+        #     my_model = ContrastiveClassifierModel(len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
+        #     if model_args.grad_checkpoint:
+        #         my_model.encoder.transformer._set_gradient_checkpointing(my_model.encoder.transformer.encoder, True)
+        #     return my_model
 
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
 
@@ -213,28 +209,28 @@ def main():
         if "train" not in raw_datasets:
             raise ValueError("--do_train requires a train dataset")
         train_dataset = raw_datasets["train"]
-        train_dataset = ContrastiveClassificationDataset(train_dataset, dataset_type='train', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name, aug=data_args.augment)
+        train_dataset = CrossEncoderDataset(train_dataset, dataset_type='train', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
         if training_args.evaluation_strategy != 'no':
             validation_dataset = raw_datasets["validation"]
-            validation_dataset = ContrastiveClassificationDataset(validation_dataset, dataset_type='validation', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
+            validation_dataset = CrossEncoderDataset(validation_dataset, dataset_type='validation', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
         if training_args.load_best_model_at_end:
             test_dataset = raw_datasets["test"]
-            test_dataset = ContrastiveClassificationDataset(test_dataset, dataset_type='test', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
+            test_dataset = CrossEncoderDataset(test_dataset, dataset_type='test', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
 
     elif training_args.do_eval:
         if "validation" not in raw_datasets:
             raise ValueError("--do_eval requires a validation dataset")
         validation_dataset = raw_datasets["validation"]
-        validation_dataset = ContrastiveClassificationDataset(validation_dataset, dataset_type='validation', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
+        validation_dataset = CrossEncoderDataset(validation_dataset, dataset_type='validation', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
 
     elif training_args.do_predict:
         if "test" not in raw_datasets:
             raise ValueError("--do_predict requires a test dataset")
         test_dataset = raw_datasets["test"]
-        test_dataset = ContrastiveClassificationDataset(test_dataset, dataset_type='test', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
+        test_dataset = CrossEncoderDataset(test_dataset, dataset_type='test', size=data_args.train_size, tokenizer=model_args.tokenizer, dataset=data_args.dataset_name)
 
     # Data collator
-    data_collator = DataCollatorContrastiveClassification(tokenizer=train_dataset.tokenizer)
+    data_collator = CrossEncoderDataCollator(tokenizer=train_dataset.tokenizer)
 
     # Early stopping callback
     callback = EarlyStoppingCallback(early_stopping_patience=10)
@@ -313,14 +309,17 @@ def main():
             last_checkpoint = get_last_checkpoint(training_args.output_dir)
 
         pos_neg = get_posneg()
-        if model_args.model_pretrained_checkpoint:
-            model = ContrastiveClassifierModel(checkpoint_path=model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
-            if model_args.grad_checkpoint:
-                model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
-        else:
-            model = ContrastiveClassifierModel(len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
-            if model_args.grad_checkpoint:
-                model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
+        model = AutoModelForSequenceClassification.from_pretrained(model_args.model_pretrained_checkpoint, num_labels=2)
+        model.resize_token_embeddings(len(train_dataset.tokenizer))
+
+        # if model_args.model_pretrained_checkpoint:
+        #     model = ContrastiveClassifierModel(checkpoint_path=model_args.model_pretrained_checkpoint, len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
+        #     if model_args.grad_checkpoint:
+        #         model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
+        # else:
+        #     model = ContrastiveClassifierModel(len_tokenizer=len(train_dataset.tokenizer), model=model_args.tokenizer, frozen=model_args.frozen, pos_neg=pos_neg, **init_args)
+        #     if model_args.grad_checkpoint:
+        #         model.encoder.transformer._set_gradient_checkpointing(model.encoder.transformer.encoder, True)
 
         # Initialize our Trainer
         trainer = Trainer(
@@ -329,7 +328,7 @@ def main():
             train_dataset=train_dataset if training_args.do_train else None,
             eval_dataset=validation_dataset if training_args.do_eval else None,
             data_collator=data_collator,
-            compute_metrics=compute_metrics_bce,
+            compute_metrics=compute_metrics_soft_max,
             callbacks=[callback]
         )
         
