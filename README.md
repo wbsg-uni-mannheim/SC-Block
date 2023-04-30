@@ -10,7 +10,7 @@ the training time of SC-Block to the reduction of the overall runtime
 of the entity resolution pipeline, we combine SC-Block with
 four state-of-the-art matching methods into complete pipelines.
 
-![SC-Block Framework](C:\Users\alebrink\Documents\02_Research\SC-Block\SC-Block_framework.PNG)
+![SC-Block Framework](./SC-Block_framework.PNG)
 
 ## Requirements
 
