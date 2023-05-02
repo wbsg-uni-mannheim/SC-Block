@@ -28,10 +28,10 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-from src.contrastive.models.modeling import ContrastiveSelfSupervisedPretrainModel
-from src.contrastive.data.datasets import ContrastivePretrainDataset
-from src.contrastive.data.data_collators import DataCollatorContrastivePretrainSelfSupervised
-from src.contrastive.models.metrics import compute_metrics_bce
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.modeling import ContrastiveSelfSupervisedPretrainModel
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDataset
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastivePretrainSelfSupervised
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
 
 from transformers import EarlyStoppingCallback
 

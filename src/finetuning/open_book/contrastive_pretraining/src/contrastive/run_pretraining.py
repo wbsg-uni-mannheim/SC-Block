@@ -30,10 +30,10 @@ from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
 #from src.contrastive.models.modeling import ContrastivePretrainModel
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.modeling import ContrastivePretrainModel
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDataset
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastivePretrain
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.modeling import ContrastivePretrainModel
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.datasets import ContrastivePretrainDataset
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastivePretrain
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce
 
 from transformers import EarlyStoppingCallback
 

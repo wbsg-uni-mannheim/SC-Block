@@ -3,9 +3,9 @@ Run column type annotation fine-tuning
 """
 import numpy as np
 
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.CrossEncoderDataCollator import \
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.CrossEncoderDataCollator import \
     CrossEncoderDataCollator
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.CrossEncoderDataset import CrossEncoderDataset
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.CrossEncoderDataset import CrossEncoderDataset
 
 np.random.seed(42)
 import random
@@ -34,7 +34,7 @@ from transformers.utils import check_min_version
 #from src.finetuning.open_book.contrastive_product_matching.src.contrastive.models.modeling import ContrastiveClassifierModel
 #from src.finetuning.open_book.contrastive_product_matching.src.contrastive.data.datasets import ContrastiveClassificationDataset
 #from src.finetuning.open_book.contrastive_product_matching.src.contrastive.data.data_collators import DataCollatorContrastiveClassification
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce, \
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce, \
     compute_metrics_soft_max
 
 from transformers import EarlyStoppingCallback
