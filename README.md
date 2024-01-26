@@ -32,6 +32,10 @@ To reproduce the results run the following scripts consecutively from the root d
 - `src/scripts/04_load_data_into_faiss.sh` embed records and load the embeddings into faiss. Please be aware that you have to train the respective models first.
 - `src/scripts/05_run_strategy.sh` run selected blocking and matching strategies.
 
+## Dataset WDC Block
+The datasets WDC Block small and WDC Block medium are found in the folder `data/deepmatcher`.
+The dataset WDC Block large is too large for this repository and can be downloaded via the following [link](https://drive.google.com/file/d/1d-6TIxV1cn8AErwfevTnLI6GMplPbqxI/view?usp=drive_link).
+
 
 ### Train contrastive models
 Navigate to the folder `src/finetuning/open_book/contrastive_pretraining/src/contrastive`
