@@ -10,10 +10,7 @@ python training_nli.py pretrained_transformer_model_name
 """
 import csv
 
-import numpy as np
-
 import click
-import pandas as pd
 from torch.utils.data import DataLoader
 import math
 from sentence_transformers import SentenceTransformer, LoggingHandler, losses, models
@@ -26,7 +23,7 @@ import os
 #### Just some code to print debug information to stdout
 
 #### /print debug information to stdout
-from src.strategy.open_book.entity_serialization import EntitySerializer
+from src.strategy.entity_serialization import EntitySerializer
 
 
 @click.command()

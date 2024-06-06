@@ -6,9 +6,9 @@ import click
 from elasticsearch import Elasticsearch
 from tqdm import tqdm
 
-from src.strategy.open_book.es_helper import determine_es_index_name
+from src.strategy.es_helper import determine_es_index_name
 from src.strategy.open_book.ranking.source.source_re_ranker import extract_host
-from src.strategy.open_book.retrieval.query_by_entity import QueryByEntity
+from src.strategy.retrieval.query_by_entity import QueryByEntity
 
 
 @click.command()

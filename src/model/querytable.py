@@ -4,10 +4,8 @@ import json
 import os
 import itertools
 
-import pandas as pd
-
 from src.model.evidence import RetrievalEvidence, AugmentationEvidence
-from src.strategy.open_book.entity_serialization import EntitySerializer
+from src.strategy.entity_serialization import EntitySerializer
 
 
 def load_query_table(raw_json):
@@ -72,8 +70,12 @@ def load_query_table_from_file(path):
     logger = logging.getLogger()
 
     with open(path, encoding='utf-8') as gsFile:
-        logger.info('Load query table from ' + path)
-        querytable = load_query_table(json.load(gsFile))
+        logger.warning('Load query table from ' + path)
+        try:
+            querytable = load_query_table(json.load(gsFile))
+        except UnicodeDecodeError:
+            logger.warning('Not able to load query table from {}'.format(path))
+            querytable = None
         if type(querytable) is not BaseQueryTable and type(querytable) is not RetrievalQueryTable \
                 and type(querytable) is not AugmentationQueryTable:
             print(type(querytable))
@@ -123,10 +125,13 @@ def get_gt_tables(type, schema_org_class):
     return gt_tables
 
 
-def get_query_table_paths(type, schema_org_class, gt_table):
+def get_query_table_paths(type, schema_org_class, gt_table, switched=False):
     """Get query table paths"""
     query_table_files = []
-    path_to_query_tables = '{}/querytables/{}/{}/{}/'.format(os.environ['DATA_DIR'], schema_org_class, type, gt_table)
+    if switched:
+        path_to_query_tables = '{}/querytables/{}/switched/{}/{}/'.format(os.environ['DATA_DIR'], schema_org_class, type, gt_table)
+    else:
+        path_to_query_tables = '{}/querytables/{}/{}/{}/'.format(os.environ['DATA_DIR'], schema_org_class, type, gt_table)
 
     if os.path.isdir(path_to_query_tables):
         # Filter for json files
@@ -179,6 +184,7 @@ class BaseQueryTable:
         self.table = table
         self.verified_evidences = verified_evidences
         self.retrieved_evidences = None
+        self.switched = False  # Flag to indicate if the query table and index table have been switched
 
     def __str__(self):
         return self.to_json(with_evidence_context=False)
@@ -214,7 +220,12 @@ class BaseQueryTable:
     def determine_path_to_querytable(self):
         gt_table = self.gt_table.lower().replace(" ", "_")
         file_name = 'gs_querytable_{}_{}.json'.format(gt_table, self.identifier)
-        return '{}/querytables/{}/{}/{}/{}'.format(os.environ['DATA_DIR'], self.schema_org_class,
+        logging.info('Switched: {}'.format(self.switched))
+        if self.switched:
+            return '{}/querytables/{}/switched/{}/{}/{}'.format(os.environ['DATA_DIR'], self.schema_org_class,
+                                                               self.type, gt_table, file_name)
+        else:
+            return '{}/querytables/{}/{}/{}/{}'.format(os.environ['DATA_DIR'], self.schema_org_class,
                                                                self.type, gt_table, file_name)
 
     def save(self, with_evidence_context, with_retrieved_evidences=False):

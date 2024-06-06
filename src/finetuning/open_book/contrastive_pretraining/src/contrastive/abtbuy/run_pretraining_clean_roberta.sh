@@ -8,12 +8,14 @@ BATCH=$1
 LR=$2
 TEMP=$3
 EPOCHS=$4
-AUG=$5
+SERIALIZATION=$5
+AUG=$6
 
-AUG="del"
 
-export PYTHONPATH=/home/alebrink/development/table-augmentation-framework/
-export CUDA_VISIBLE_DEVICES=0
+#AUG="del"
+
+export PYTHONPATH=/home/alebrink/development/sc-block
+#export CUDA_VISIBLE_DEVICES=1
 
 python run_pretraining_deepmatcher.py \
     --do_train \
@@ -23,7 +25,7 @@ python run_pretraining_deepmatcher.py \
 	--id_deduction_set /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
-    --output_dir /ceph/alebrink/contrastive-product-matching/reports/contrastive/abtbuy-clean-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
+    --output_dir /ceph/alebrink/contrastive-product-matching/reports/contrastive/abtbuy-clean-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base-$SERIALIZATION/ \
 	--temperature=$TEMP \
 	--per_device_train_batch_size=$BATCH \
 	--learning_rate=$LR \
@@ -38,3 +40,4 @@ python run_pretraining_deepmatcher.py \
 	--save_strategy="epoch" \
 	--logging_strategy="epoch" \
 	--augment=$AUG \
+	--serialization=$SERIALIZATION \

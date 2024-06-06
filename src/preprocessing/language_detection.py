@@ -20,3 +20,4 @@ class LanguageDetector:
                           and type(raw_entity[checked_attribute]) not in [list, dict]])
         output = self.fmodel.predict([str(value)])
         return output[0][0][0] != '__label__en' and output[1][0][0] > 0.5
+

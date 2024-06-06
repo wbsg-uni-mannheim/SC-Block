@@ -95,6 +95,9 @@ class DataTrainingArguments:
     augment: Optional[str] = field(
         default=None, metadata={"help": "The data augmentation to use."}
     )
+    serialization: Optional[str] = field(
+        default=None, metadata={"help": "The serialization used for the records."}
+    )
     id_deduction_set: Optional[str] = field(
         default=None, metadata={"help": "The size of the training set."}
     )

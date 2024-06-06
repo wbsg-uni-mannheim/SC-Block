@@ -12,9 +12,9 @@ def validate_configuration(config):
                 raise ValueError('Configuration for {} - {} missing'.format(parent_attribute, child_attribute))
 
     # Check if all general attributes are defined!
-    general_attributes = ['k', 'k_range', 'save_results_with_evidences', 'es_instance']
+    general_attributes = ['k', 'k_range', 'save_results_with_evidences']
     check_configuration_attributes('general', general_attributes)
-    query_table_attributes = ['schema_org_class', 'context-attributes']
+    query_table_attributes = ['dataset', 'context-attributes']
     check_configuration_attributes('query-tables', query_table_attributes)
 
     pipeline_steps = ['retrieval-strategies', 'similarity-re-ranking-strategies', 'source-re-ranking-strategies',
@@ -56,7 +56,8 @@ def build_pipelines_from_configuration(config):
                                                        'with_projection': retrieval_strategy['with_projection'],
                                                        'projection': retrieval_strategy['projection'],
                                                        'pooling': pooling,
-                                                       'similarity': similarity}
+                                                       'similarity': similarity,
+                                                       'without_special_tokens_and_attribute_names': retrieval_strategy['without_special_tokens_and_attribute_names'] if 'without_special_tokens_and_attribute_names' in retrieval_strategy else False,}
                         pipelines.append({'retrieval_strategy': specific_retrieval_strategy,
                                           'similarity_re_ranking_strategy': similarity_re_ranking_strategy,
                                           'source_re_ranking_strategy': source_re_ranking_strategy,

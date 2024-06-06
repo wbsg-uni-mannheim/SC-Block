@@ -5,7 +5,7 @@ import random
 import click
 import pandas as pd
 
-from src.strategy.open_book.entity_serialization import EntitySerializer
+from src.strategy.entity_serialization import EntitySerializer
 
 
 @click.command()

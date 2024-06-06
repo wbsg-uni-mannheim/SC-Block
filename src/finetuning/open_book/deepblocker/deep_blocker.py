@@ -1,11 +1,7 @@
 #GiG
-from datetime import datetime
 
-import numpy as np
-import pandas as pd
-from pathlib import Path
 import blocking_utils
-from src.strategy.open_book.entity_serialization import EntitySerializer
+from src.strategy.entity_serialization import EntitySerializer
 
 
 class DeepBlocker:

@@ -94,6 +94,10 @@ class DataTrainingArguments:
     augment: Optional[str] = field(
         default=None, metadata={"help": "The data augmentation to use."}
     )
+
+    serialization: Optional[str] = field(
+        default=None, metadata={"help": "The serialization used for the records."}
+    )
     id_deduction_set: Optional[str] = field(
         default=None, metadata={"help": "The size of the training set."}
     )
@@ -189,6 +193,8 @@ def main():
         data_files["test"] = data_args.test_file
     raw_datasets = data_files
 
+    logging.warning("Serialization: " + str(data_args.serialization))
+
     if training_args.do_train:
         if "train" not in raw_datasets:
             raise ValueError("--do_train requires a train dataset")
@@ -201,32 +207,32 @@ def main():
                                                                       dataset=data_args.dataset_name,
                                                                       deduction_set=data_args.id_deduction_set,
                                                                       aug=data_args.augment, dataset_type='train',
-                                                                      split=data_args.split)
+                                                                      split=data_args.split, serialization=data_args.serialization)
                 validation_dataset = ContrastivePretrainDatasetDeepmatcher(raw_datasets["validation"], tokenizer=model_args.tokenizer,
                                                                       intermediate_set=data_args.interm_file,
                                                                       clean=data_args.clean,
                                                                       dataset=data_args.dataset_name,
                                                                       deduction_set=data_args.id_deduction_set,
                                                                       aug=data_args.augment, dataset_type='valid',
-                                                                        split=data_args.split)
+                                                                        split=data_args.split, serialization=data_args.serialization)
             else:
-                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer, intermediate_set=data_args.interm_file, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment, split=data_args.split)
+                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer, intermediate_set=data_args.interm_file, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment, split=data_args.split, serialization=data_args.serialization)
         else:
             if "validation" in raw_datasets:
                 train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer,
                                                                       clean=data_args.clean,
                                                                       dataset=data_args.dataset_name,
                                                                       deduction_set=data_args.id_deduction_set,
-                                                                      aug=data_args.augment, dataset_type='train', split=data_args.split)
+                                                                      aug=data_args.augment, dataset_type='train', split=data_args.split, serialization=data_args.serialization)
 
                 validation_dataset = ContrastivePretrainDatasetDeepmatcher(raw_datasets["validation"], tokenizer=model_args.tokenizer,
                                                                       clean=data_args.clean,
                                                                       dataset=data_args.dataset_name,
                                                                       deduction_set=data_args.id_deduction_set,
-                                                                      aug=data_args.augment, dataset_type='valid', split=data_args.split)
+                                                                      aug=data_args.augment, dataset_type='valid', split=data_args.split, serialization=data_args.serialization)
 
             else:
-                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment, split=data_args.split)
+                train_dataset = ContrastivePretrainDatasetDeepmatcher(train_dataset, tokenizer=model_args.tokenizer, clean=data_args.clean, dataset=data_args.dataset_name, deduction_set=data_args.id_deduction_set, aug=data_args.augment, split=data_args.split, serialization=data_args.serialization)
 
     # Data collator
     data_collator = DataCollatorContrastivePretrainDeepmatcher(tokenizer=train_dataset.tokenizer)

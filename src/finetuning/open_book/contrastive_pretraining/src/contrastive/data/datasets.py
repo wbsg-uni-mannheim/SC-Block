@@ -2,8 +2,8 @@ import logging
 
 import numpy as np
 
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.data.augmentation import delete_random_tokens
-from src.strategy.open_book.entity_serialization import EntitySerializer
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.augmentation import delete_random_tokens
+from src.strategy.entity_serialization import EntitySerializer
 
 np.random.seed(42)
 import random
@@ -11,22 +11,14 @@ random.seed(42)
 
 import pandas as pd
 
-from pathlib import Path
-import glob
-import gzip
-import pickle
-from copy import deepcopy
-
 import torch
-import torch.nn.functional as F
 
-from transformers import AutoTokenizer, AutoConfig
+from transformers import AutoTokenizer
 
 #import nlpaug.augmenter.word as naw
 #import nlpaug.augmenter.char as nac
 from sklearn.preprocessing import LabelEncoder
 
-from pdb import set_trace
 
 def assign_clusterid(identifier, cluster_id_dict, cluster_id_amount):
     try:
@@ -46,9 +38,9 @@ def serialize_sample_lspc(sample):
 
     return string
 
-def serialize_sample_abtbuy(sample):
+def serialize_sample_abtbuy(sample, without_special_tokens_and_attribute_names=False):
     entity_serializer = EntitySerializer('abt-buy')
-    string = entity_serializer.convert_to_str_representation(sample.to_dict())
+    string = entity_serializer.convert_to_str_representation(sample.to_dict(), without_special_tokens_and_attribute_names=without_special_tokens_and_attribute_names)
     # string = ''
     # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"brand"].split())}'.strip()
     # string = f'{string} [COL] title [VAL] {" ".join(sample[f"name"].split())}'.strip()
@@ -58,11 +50,11 @@ def serialize_sample_abtbuy(sample):
     return string
 
 
-def serialize_sample_amazongoogle(sample):
+def serialize_sample_amazongoogle(sample, without_special_tokens_and_attribute_names=False):
     entity_serializer = EntitySerializer('amazon-google')
     dict_sample = sample.to_dict()
     dict_sample['name'] = dict_sample['title']
-    string = entity_serializer.convert_to_str_representation(dict_sample)
+    string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=without_special_tokens_and_attribute_names)
     # string = ''
     # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"manufacturer"].split())}'.strip()
     # string = f'{string} [COL] title [VAL] {" ".join(sample[f"title"].split())}'.strip()
@@ -72,11 +64,11 @@ def serialize_sample_amazongoogle(sample):
     return string
 
 
-def serialize_sample_dblpacm(sample):
+def serialize_sample_dblpacm(sample, without_special_tokens_and_attribute_names=False):
     entity_serializer = EntitySerializer('dblp-acm_1')
     dict_sample = sample.to_dict()
     dict_sample['name'] = dict_sample['title']
-    string = entity_serializer.convert_to_str_representation(dict_sample)
+    string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=without_special_tokens_and_attribute_names)
     # string = ''
     # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"brand"].split())}'.strip()
     # string = f'{string} [COL] title [VAL] {" ".join(sample[f"name"].split())}'.strip()
@@ -86,11 +78,11 @@ def serialize_sample_dblpacm(sample):
     return string
 
 
-def serialize_sample_dblpscholar(sample):
+def serialize_sample_dblpscholar(sample, without_special_tokens_and_attribute_names=False):
     entity_serializer = EntitySerializer('dblp-googlescholar_1')
     dict_sample = sample.to_dict()
     dict_sample['name'] = dict_sample['title']
-    string = entity_serializer.convert_to_str_representation(dict_sample)
+    string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=without_special_tokens_and_attribute_names)
     # string = ''
     # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"brand"].split())}'.strip()
     # string = f'{string} [COL] title [VAL] {" ".join(sample[f"name"].split())}'.strip()
@@ -99,11 +91,11 @@ def serialize_sample_dblpscholar(sample):
 
     return string
 
-def serialize_sample_walmartamazon(sample):
+def serialize_sample_walmartamazon(sample, without_special_tokens_and_attribute_names=False):
     entity_serializer = EntitySerializer('walmart-amazon_1')
     dict_sample = sample.to_dict()
     dict_sample['name'] = dict_sample['title']
-    string = entity_serializer.convert_to_str_representation(dict_sample)
+    string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=without_special_tokens_and_attribute_names)
     # string = ''
     # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"brand"].split())}'.strip()
     # string = f'{string} [COL] title [VAL] {" ".join(sample[f"name"].split())}'.strip()
@@ -112,11 +104,11 @@ def serialize_sample_walmartamazon(sample):
 
     return string
 
-def serialize_sample_wdcproducts(sample):
+def serialize_sample_wdcproducts(sample, without_special_tokens_and_attribute_names=False):
     entity_serializer = EntitySerializer('wdcproducts')
     dict_sample = sample.to_dict()
     dict_sample['name'] = dict_sample['title']
-    string = entity_serializer.convert_to_str_representation(dict_sample)
+    string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=without_special_tokens_and_attribute_names)
     # string = ''
     # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"brand"].split())}'.strip()
     # string = f'{string} [COL] title [VAL] {" ".join(sample[f"name"].split())}'.strip()
@@ -242,7 +234,7 @@ class ContrastivePretrainDataset(torch.utils.data.Dataset):
         elif self.dataset == 'walmart-amazon':
             data['features'] = data.apply(serialize_sample_walmartamazon, axis=1)
 
-        elif self.dataset == 'wdc-b':
+        elif self.dataset == 'wdcproducts80cc20rnd050un':
             data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
 
         elif self.dataset == 'wdcproducts80cc20rnd000un':
@@ -333,7 +325,7 @@ class ContrastivePretrainDatasetSSV(torch.utils.data.Dataset):
         elif self.dataset == 'wdcproducts80cc20rnd000un':
             data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
 
-        elif self.dataset == 'wdc-b':
+        elif self.dataset == 'wdcproducts80cc20rnd050un':
             data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
 
         # label_enc = LabelEncoder()
@@ -350,12 +342,16 @@ class ContrastivePretrainDatasetSSV(torch.utils.data.Dataset):
 # builds correspondence graph from train+val and builds source-aware sampling datasets
 # if split=False, corresponds to not using source-aware sampling
 class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
-    def __init__(self, path, deduction_set, tokenizer='huawei-noah/TinyBERT_General_4L_312D', max_length=128, intermediate_set=None, clean=False, dataset='abt-buy', aug=False, split=True, dataset_type='train+valid'):
+    def __init__(self, path, deduction_set, tokenizer='huawei-noah/TinyBERT_General_4L_312D', max_length=128, intermediate_set=None, clean=False, dataset='abt-buy', aug=False, split=True, dataset_type='train+valid', serialization=False):
 
         self.max_length = max_length
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer, additional_special_tokens=('[COL]', '[VAL]'))
         self.dataset = dataset
         self.aug = aug
+        self.without_special_tokens_and_attribute_names = True if serialization == "no_attribute_names" else False
+
+        if self.without_special_tokens_and_attribute_names:
+            logging.info('No special tokens and attribute names')
 
         # if self.aug:
         #     self.augmenter = Augmenter(self.aug)
@@ -381,8 +377,8 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
                 val = pd.read_csv('../../data/interim/dblp-googlescholar/dblp-googlescholar-valid.csv')
             elif dataset == 'walmart-amazon':
                 val = pd.read_csv('../../data/interim/walmart-amazon/walmart-amazon-valid.csv')
-            elif dataset == 'wdc-b':
-                val = pd.read_csv('../../data/interim/wdc-b/wdc-b-valid.csv')
+            elif dataset == 'wdcproducts80cc20rnd050un':
+                val = pd.read_csv('../../data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-valid.csv')
             elif dataset == 'wdcproducts80cc20rnd000un':
                 val = pd.read_csv('../../data/interim/wdcproducts80cc20rnd000un/wdcproducts80cc20rnd000un-valid.csv')
 
@@ -456,7 +452,7 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
             elif dataset == 'walmart-amazon':
                 left_index = [x for x in index if 'walmart' in x]
                 right_index = [x for x in index if 'amazon' in x]
-            elif dataset == 'wdc-b':
+            elif dataset == 'wdcproducts80cc20rnd050un':
                 left_index = [x for x in index if 'tablea' in x]
                 right_index = [x for x in index if 'tableb' in x]
             elif dataset == 'wdcproducts80cc20rnd000un':
@@ -584,25 +580,25 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
             data['features'] = data.apply(serialize_sample_lspc, axis=1)
 
         elif self.dataset == 'abt-buy':
-            data['features'] = data.apply(serialize_sample_abtbuy, axis=1)
+            data['features'] = data.apply(serialize_sample_abtbuy, axis=1, args=(self.without_special_tokens_and_attribute_names,))
 
         elif self.dataset == 'amazon-google':
-            data['features'] = data.apply(serialize_sample_amazongoogle, axis=1)
+            data['features'] = data.apply(serialize_sample_amazongoogle, axis=1, args=(self.without_special_tokens_and_attribute_names,))
 
         elif self.dataset == 'dblp-acm':
-            data['features'] = data.apply(serialize_sample_dblpacm, axis=1)
+            data['features'] = data.apply(serialize_sample_dblpacm, axis=1, args=(self.without_special_tokens_and_attribute_names,))
 
         elif self.dataset == 'dblp-googlescholar':
-            data['features'] = data.apply(serialize_sample_dblpscholar, axis=1)
+            data['features'] = data.apply(serialize_sample_dblpscholar, axis=1, args=(self.without_special_tokens_and_attribute_names,))
 
         elif self.dataset == 'walmart-amazon':
-            data['features'] = data.apply(serialize_sample_walmartamazon, axis=1)
+            data['features'] = data.apply(serialize_sample_walmartamazon, axis=1, args=(self.without_special_tokens_and_attribute_names,))
 
-        elif self.dataset == 'wdc-b':
-            data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
+        elif self.dataset == 'wdcproducts80cc20rnd050un':
+            data['features'] = data.apply(serialize_sample_wdcproducts, axis=1, args=(self.without_special_tokens_and_attribute_names,))
 
         elif self.dataset == 'wdcproducts80cc20rnd000un':
-            data['features'] = data.apply(serialize_sample_wdcproducts, axis=1)
+            data['features'] = data.apply(serialize_sample_wdcproducts, axis=1, args=(self.without_special_tokens_and_attribute_names,))
 
         data = data[['features', 'labels']]
 
@@ -649,8 +645,8 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
                 validation_ids = pd.read_csv('../../data/interim/dblp-googlescholar/dblp-googlescholar-valid.csv')
             elif dataset == 'walmart-amazon':
                 validation_ids = pd.read_csv('../../data/interim/walmart-amazon/walmart-amazon-valid.csv')
-            elif dataset == 'wdc-b':
-                validation_ids = pd.read_csv('../../data/interim/wdc-b/wdc-b-valid.csv')
+            elif dataset == 'wdcproducts80cc20rnd050un':
+                validation_ids = pd.read_csv('../../data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-valid.csv')
             elif dataset == 'wdcproducts80cc20rnd000un':
                 validation_ids = pd.read_csv('../../data/interim/wdcproducts80cc20rnd000un/wdcproducts80cc20rnd000un-valid.csv')
 
@@ -703,7 +699,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         elif self.dataset == 'walmart-amazon':
             data['features_left'] = data.apply(self.serialize_sample_walmartamazon, args=('left',), axis=1)
             data['features_right'] = data.apply(self.serialize_sample_walmartamazon, args=('right',), axis=1)
-        elif self.dataset == 'wdc-b':
+        elif self.dataset == 'wdcproducts80cc20rnd050un':
             data['features_left'] = data.apply(self.serialize_sample_wdcproduct, args=('left',), axis=1)
             data['features_right'] = data.apply(self.serialize_sample_wdcproduct, args=('right',), axis=1)
         elif self.dataset == 'wdcproducts80cc20rnd000un':
@@ -733,7 +729,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         dict_sample['name'] = dict_sample['name_{}'.format(side)]
         dict_sample['price'] = dict_sample['price_{}'.format(side)]
         dict_sample['description'] = dict_sample['description_{}'.format(side)]
-        string = entity_serializer.convert_to_str_representation(dict_sample)
+        string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=self.without_special_tokens_and_attribute_names)
 
         # string = ''
         # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"brand_{side}"].split())}'.strip()
@@ -752,7 +748,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         dict_sample['name'] = dict_sample['title_{}'.format(side)]
         dict_sample['price'] = dict_sample['price_{}'.format(side)]
         dict_sample['description'] = dict_sample['description_{}'.format(side)]
-        string = entity_serializer.convert_to_str_representation(dict_sample)
+        string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=self.without_special_tokens_and_attribute_names)
 
         # string = ''
         # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"manufacturer_{side}"].split())}'.strip()
@@ -770,7 +766,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         dict_sample['authors'] = dict_sample['authors_{}'.format(side)]
         dict_sample['venue'] = dict_sample['venue_{}'.format(side)]
         dict_sample['year'] = dict_sample['year_{}'.format(side)]
-        string = entity_serializer.convert_to_str_representation(dict_sample)
+        string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=self.without_special_tokens_and_attribute_names)
 
         # string = ''
         # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"manufacturer_{side}"].split())}'.strip()
@@ -788,7 +784,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         dict_sample['authors'] = dict_sample['authors_{}'.format(side)]
         dict_sample['venue'] = dict_sample['venue_{}'.format(side)]
         dict_sample['year'] = dict_sample['year_{}'.format(side)]
-        string = entity_serializer.convert_to_str_representation(dict_sample)
+        string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=self.without_special_tokens_and_attribute_names)
 
         # string = ''
         # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"manufacturer_{side}"].split())}'.strip()
@@ -808,7 +804,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         dict_sample['brand'] = dict_sample['brand_{}'.format(side)]
         dict_sample['modelno'] = dict_sample['modelno_{}'.format(side)]
         dict_sample['price'] = dict_sample['price_{}'.format(side)]
-        string = entity_serializer.convert_to_str_representation(dict_sample)
+        string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=self.without_special_tokens_and_attribute_names)
 
         # string = ''
         # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"manufacturer_{side}"].split())}'.strip()
@@ -827,7 +823,7 @@ class ContrastiveClassificationDataset(torch.utils.data.Dataset):
         dict_sample['description'] = dict_sample['description_{}'.format(side)]
         dict_sample['price'] = dict_sample['price_{}'.format(side)]
         dict_sample['pricecurrency'] = dict_sample['pricecurrency_{}'.format(side)]
-        string = entity_serializer.convert_to_str_representation(dict_sample)
+        string = entity_serializer.convert_to_str_representation(dict_sample, without_special_tokens_and_attribute_names=self.without_special_tokens_and_attribute_names)
 
         # string = ''
         # string = f'{string}[COL] brand [VAL] {" ".join(sample[f"manufacturer_{side}"].split())}'.strip()

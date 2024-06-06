@@ -16,6 +16,10 @@ def convert_table_to_query_table(dataset, table_name):
     """ Convert Test set Table A of deepmatcher benchmark to query table
     :param dataset string org class represents the dataset name"""
 
+    switched = False if table_name == 'tableA' else True  # Switched table A and B
+    if switched:
+        logging.info('Switched table A and B')
+
     path_to_table_a = '{}/deepmatcher/{}/{}.csv'.format(
         os.environ['DATA_DIR'], dataset, table_name)
     path_to_test_set = '{}/deepmatcher/{}/test.csv'.format(os.environ['DATA_DIR'], dataset)
@@ -75,9 +79,12 @@ def convert_table_to_query_table(dataset, table_name):
                        'itunes-amazon_2': 17000,
                        'walmart-amazon_1': 18000,
                        'walmart-amazon_2': 19000,
-                       'wdc-b': 20000,
+                       'wdcproducts80cc20rnd050un': 20000,
                        'wdcproducts80cc20rnd000un': 21000,
-                       'wdcproducts80cc20rnd100un': 22000}
+                       'wdcproducts80cc20rnd100un': 22000,
+                       'wdcproducts80cc20rnd050un_block_s_train_l': 23000,
+                       'wdcproducts80cc20rnd050un_block_m_train_l': 24000,
+                       'wdcproducts80cc20rnd050un_block_l_train_l': 25000}
 
     qt_id = query_table_ids[dataset]
     assembling_strategy = 'Test {} of data set {}'.format(table_name, dataset)
@@ -102,6 +109,7 @@ def convert_table_to_query_table(dataset, table_name):
                                               gt_table, dataset,
                                               context_attributes,  # Exclude id
                                               table, verified_evidences)
+            query_table.switched = switched
             query_table.save(with_evidence_context=False)
 
             # Initialize variables for new query table
@@ -173,6 +181,7 @@ def convert_table_to_query_table(dataset, table_name):
                                       gt_table, dataset,
                                       context_attributes,  # Exclude id
                                       table, verified_evidences)
+    query_table.switched = switched
     query_table.save(with_evidence_context=False)
     logging.info('Converted {} of {} to query table'.format(table_name, dataset))
 

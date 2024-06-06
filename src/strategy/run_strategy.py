@@ -6,22 +6,18 @@ from datetime import datetime
 
 import numpy as np
 from torch.multiprocessing import Pool, set_start_method
-#from multiprocessing import Pool
 from random import randrange
 import random
 
 import click
-import pandas as pd
 import torch
 import yaml
-from tqdm import tqdm
 
 from src.evaluation.aggregate_results import aggregate_results, save_aggregated_result
 from src.evaluation.evaluate_query_tables import evaluate_query_table
 from src.model.querytable import load_query_table_from_file, get_gt_tables, get_query_table_paths
-from src.strategy.open_book.ranking.similarity.similarity_re_ranking_factory import select_similarity_re_ranker
-from src.strategy.open_book.ranking.source.source_re_ranking_factory import select_source_re_ranker
-from src.strategy.open_book.retrieval.retrieval_strategy_factory import select_retrieval_strategy
+from src.strategy.ranking.similarity.similarity_re_ranking_factory import select_similarity_re_ranker
+from src.strategy.retrieval.retrieval_strategy_factory import select_retrieval_strategy
 from src.strategy.pipeline_building import build_pipelines_from_configuration, validate_configuration
 
 def set_seed(seed):
@@ -51,7 +47,9 @@ def run_experiments_from_configuration(path_to_config, worker):
     experiment_type = config['general']['experiment-type']
 
     # Load query tables
-    schema_org_class = config['query-tables']['schema_org_class']
+    dataset = config['query-tables']['dataset']
+    switched = config['query-tables']['switched'] if 'switched' in config['query-tables'] else False
+    logger.info('Switched: {}'.format(switched))
     query_table_paths = []
     if type(config['query-tables']['path-to-query-table']) is str:
         # Run for single query table
@@ -59,15 +57,16 @@ def run_experiments_from_configuration(path_to_config, worker):
     elif config['query-tables']['gt-table'] is not None:
         # Run on query tables for gt table
         query_table_paths.extend(get_query_table_paths(config['general']['experiment-type'],
-                                                  config['query-tables']['schema_org_class'],
-                                                  config['query-tables']['gt-table']))
+                                                  config['query-tables']['dataset'],
+                                                  config['query-tables']['gt-table'], switched=switched))
     else:
-        # Run on all query tables of schema org class
-        for gt_table in get_gt_tables(config['general']['experiment-type'], schema_org_class):
-            query_table_paths.extend(get_query_table_paths(config['general']['experiment-type'], schema_org_class,
-                                                           gt_table))
+        # Run on all query tables of the dataset
+        for gt_table in get_gt_tables(config['general']['experiment-type'], dataset):
+            query_table_paths.extend(get_query_table_paths(config['general']['experiment-type'], dataset,
+                                                           gt_table, switched=switched))
 
     string_timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    print(query_table_paths[0])
 
     if config['general']['k'] is not None:
         k_range = [config['general']['k']]
@@ -101,14 +100,13 @@ def run_experiments_from_configuration(path_to_config, worker):
 
             if worker == 0:
                 results, execution_times = run_experiments(experiment_type, retrieval_strategy, similarity_re_ranking_strategy,
-                                          source_re_ranking_strategy,
-                                          voting_strategies, query_table_paths, schema_org_class, k,
-                                          context_attributes, clusters=clusters)
+                                                           source_re_ranking_strategy,
+                                                           voting_strategies, query_table_paths, dataset, k,
+                                                           context_attributes, clusters=clusters, switched=switched)
                 if results is not None:
                     for result in results:
                         result.save_result(file_name, save_results_with_evidences)
 
-                    #for i in range(1, 11):
                     aggregated_result = aggregate_results(results, k, execution_times)
                     save_aggregated_result(aggregated_result, file_name)
 
@@ -117,8 +115,8 @@ def run_experiments_from_configuration(path_to_config, worker):
                 async_results.append(pool.apply_async(run_experiments, (experiment_type, retrieval_strategy,
                                                                         similarity_re_ranking_strategy,
                                                                         source_re_ranking_strategy, voting_strategies,
-                                                                        query_table_paths, schema_org_class, k,
-                                                                        context_attributes, clusters)))
+                                                                        query_table_paths, dataset, k,
+                                                                        context_attributes, clusters, switched,)))
 
         if worker > 0:
             logger.info('Waiting for all experiments to finish!')
@@ -135,24 +133,23 @@ def run_experiments_from_configuration(path_to_config, worker):
 
 
 def run_experiments(experiment_type, retrieval_str_conf, similarity_re_ranking_str_conf, source_re_ranking_str_conf,
-                    voting_strategies, query_table_paths, schema_org_class, evidence_count, context_attributes=None, clusters=False):
+                    voting_strategies, query_table_paths, dataset, evidence_count, context_attributes=None, clusters=False, switched=False):
     """Run Pipeline on query tables"""
 
     time.sleep(randrange(30))
     logger = logging.getLogger()
     # Initialize strategy
-    retrieval_strategy = select_retrieval_strategy(retrieval_str_conf, schema_org_class, clusters)
-    similarity_re_ranker = select_similarity_re_ranker(similarity_re_ranking_str_conf, schema_org_class,
+    retrieval_strategy = select_retrieval_strategy(retrieval_str_conf, dataset, clusters, switched)
+    similarity_re_ranker = select_similarity_re_ranker(similarity_re_ranking_str_conf, dataset,
                                                        context_attributes)
-    #similarity_re_ranker = select_similarity_re_ranker(similarity_re_ranking_str_conf, schema_org_class,
-    #                                                   context_attributes)
-    source_re_ranker = select_source_re_ranker(source_re_ranking_str_conf, schema_org_class)
+    #source_re_ranker = select_source_re_ranker(source_re_ranking_str_conf, dataset)
+    source_re_ranker = None # Exclude source re-ranking for now
     logger.info('Run experiments on {} query tables'.format(len(query_table_paths)))
     results = []
     execution_times = []
 
     materialized_pairs = []
-    for query_table_path in tqdm(query_table_paths):
+    for query_table_path in query_table_paths:
 
         query_table = load_query_table_from_file(query_table_path)
         # FIX context attributes
@@ -170,22 +167,9 @@ def run_experiments(experiment_type, retrieval_str_conf, similarity_re_ranking_s
         materialized_pairs.extend(query_table.materialize_pairs())
         execution_times.append(execution_times_per_run)
 
-        # Materialize Query Table into matching data set
-
-
-        # Hack to get Daniel's query tables
-        #query_table.verified_evidences = retrieve_evidences_with_pipeline(query_table, retrieval_strategy, evidence_count,
-        #                                             similarity_re_ranker, source_re_ranker)
-        #query_table.verified_evidences = [evidence for evidence in query_table.verified_evidences if
-        #                                  evidence.similarity_score == 1]
-        #query_table.schema_org_class = 'localbusiness_daniel'
-        #query_table.save(with_evidence_context=False, with_retrieved_evidences=True)
-
         if retrieval_str_conf['name'] == 'generate_entity':
             k_intervals = [1]
         else:
-            #k_intervals = [1, 5, 10, 20, 50, evidence_count]
-            #k_intervals = [1, 5, 10, 20, 200]
             k_intervals = [evidence_count]
 
         for voting_str_conf in voting_strategies:
@@ -194,30 +178,12 @@ def run_experiments(experiment_type, retrieval_str_conf, similarity_re_ranking_s
                                                source_re_ranker, k_intervals, voting_str_conf['name'], split=split,
                                                collect_result_context=True)
             results.extend(new_results)
-        # else:
-        #     k_intervals = [5, 10, 20, 50, 70]
-        #     #k_intervals = [5, 10]
-        #
-        #     for voting_str_conf in voting_strategies:
-        #         new_results = evaluate_query_table(query_table, retrieval_strategy, similarity_re_ranker, source_re_ranker,
-        #                                        evidences, k_intervals, voting_str_conf['name'])
-        #         results.extend(new_results)
 
     aggregated_execution_times = {key: sum([execution_time[key] for execution_time in execution_times])
                                   for key in execution_times[0]}
 
     logger.info('Finished running experiments on subset of query tables!')
 
-    #df_pairs = pd.DataFrame(materialized_pairs)
-    # path_to_pairs = query_table_paths[0].replace('.json', '').replace('querytables', 'intermediate').split('retrieval')[0] + ' ' + retrieval_strategy.name + ' ' + retrieval_strategy.model_name + '.csv'
-    # with open(path_to_pairs, 'w') as file:
-    #     for pair in materialized_pairs:
-    #         file.write('{}\t{}\t{}\n'.format(pair['lencoded'], pair['rencoded'], pair['match']))
-    # if similarity_re_ranker is not None:
-    #     path_to_pairs += similarity_re_ranker.name
-    # path_to_pairs += '.csv'
-    #
-    # df_pairs.to_csv(path_to_pairs)
     return results, aggregated_execution_times
 
 
@@ -291,7 +257,8 @@ def run_strategy_to_retrieve_evidence(query_table_id, schema_org_class, experime
     #To-Do: Does it make sense to set clusters always to true?
     retrieval_strategy = select_retrieval_strategy(retrieval_str_conf, schema_org_class, clusters=True)
     similarity_re_ranker = select_similarity_re_ranker(similarity_re_ranking_str_conf, schema_org_class)
-    source_re_ranker = select_source_re_ranker(source_re_ranking_str_conf, schema_org_class)
+    #source_re_ranker = select_source_re_ranker(source_re_ranking_str_conf, schema_org_class)
+    source_re_ranker = None # Exclude source re-ranker for now
 
     query_table = None
     context_attributes = ['name', 'addresslocality']

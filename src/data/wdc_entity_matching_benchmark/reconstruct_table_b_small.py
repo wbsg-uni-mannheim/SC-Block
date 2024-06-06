@@ -12,6 +12,6 @@ print(table_csv.columns)
 print(table_json.columns)
 filtered_table = table_csv[table_csv['id'].isin(table_json['row_id'])]
 
-filtered_table.to_csv('C:/Users/alebrink/Documents/02_Research/TableAugmentation/table-augmentation-framework/data/deepmatcher/wdc-b/tableB_short.csv', index=False)
+filtered_table.to_csv('C:/Users/alebrink/Documents/02_Research/TableAugmentation/table-augmentation-framework/data/deepmatcher/wdcproducts80cc20rnd050un/tableB_short.csv', index=False)
 
 print(f'Table from JSON file: \n{table_json}')

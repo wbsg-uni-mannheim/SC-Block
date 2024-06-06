@@ -9,7 +9,7 @@ from datasets import load_metric
 from transformers import Trainer, TrainingArguments, AutoModelForSequenceClassification, AutoTokenizer
 
 from src.finetuning.open_book.cross_encoder.MatchingDataset import MatchingDataset
-from src.strategy.open_book.entity_serialization import EntitySerializer
+from src.strategy.entity_serialization import EntitySerializer
 from src.strategy.open_book.ranking.similarity.hf_re_ranker import determine_path_to_model
 
 

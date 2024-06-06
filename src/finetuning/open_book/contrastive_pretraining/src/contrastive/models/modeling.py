@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch.nn import BCEWithLogitsLoss
 
 from transformers import AutoModel, AutoConfig
-from src.finetuning.open_book.supervised_contrastive_pretraining.src.contrastive.models.loss import SupConLoss, BarlowTwins
+from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.loss import SupConLoss, BarlowTwins
 
 
 def mean_pooling(model_output, attention_mask):

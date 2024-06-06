@@ -22,8 +22,13 @@ def convert_table_to_table_format(dataset, table_name, path_to_additional_record
 
     path_to_table_b = '{}/deepmatcher/{}/{}.csv'.format(
         os.environ['DATA_DIR'], dataset, table_name)
-    path_to_corpus_table = '{}/corpus/{}'.format(
-        os.environ['DATA_DIR'], dataset.lower())
+    if table_name == 'tableB':
+        path_to_corpus_table = '{}/corpus/{}'.format(
+            os.environ['DATA_DIR'], dataset.lower())
+    elif table_name == 'tableA':
+        path_to_corpus_table = '{}/corpus/switched/{}'.format(
+            os.environ['DATA_DIR'], dataset.lower())
+
 
     formatted_lines = []
 
@@ -105,7 +110,7 @@ def convert_table_to_table_format(dataset, table_name, path_to_additional_record
             save_additional_records(collected_additional_records, path_to_corpus_table, dataset,
                                     no_additional_record_files)
 
-    logging.info('Added additional rows to index table such that it has a complete size of {}!'.format(str(index_size)))
+        logging.info('Added additional rows to index table such that it has a complete size of {}!'.format(str(index_size)))
 
 
 def save_additional_records(collected_additional_records, path_to_corpus_table, dataset, additional_record_files):

@@ -1,13 +1,11 @@
 import itertools
 import logging
-import time
 
 from tqdm import tqdm
 
 from src.model.result import Result
 from src.preprocessing.value_normalizer import get_datatype, normalize_value
-from src.similarity.coordinate import haversine
-from src.strategy.open_book.entity_serialization import EntitySerializer
+from src.strategy.entity_serialization import EntitySerializer
 
 
 def evaluate_query_table(query_table, experiment_type, retrieval_strategy, similarity_reranker, source_reranker,
@@ -70,6 +68,8 @@ def evaluate_query_table(query_table, experiment_type, retrieval_strategy, simil
                 negative_evidences = [evidence for evidence in query_table.verified_evidences
                                       if not evidence.signal]
 
+
+
                 # Filter by split
                 if split in ['train', 'valid', 'test']:
                     positive_evidences = [evidence for evidence in positive_evidences
@@ -94,14 +94,19 @@ def evaluate_query_table(query_table, experiment_type, retrieval_strategy, simil
                 # positive_evidences_per_row = [evidence for evidence in query_table.verified_evidences
                 #                                 if not evidence.signal and evidence.split == split]
 
+                #print(row['entityId'])
+                #print(query_table.retrieved_evidences)
                 all_retrieved_evidences = [evidence for evidence in query_table.retrieved_evidences if
                                                evidence.entity_id == row['entityId']]
+                #print(all_retrieved_evidences)
 
                 if split in ['train', 'valid', 'test']:
                     all_retrieved_evidences = [evidence for evidence in all_retrieved_evidences if
                                                (evidence in positive_evidences) or (evidence in negative_evidences)]
 
                 all_retrieved_evidences.sort(key=lambda evidence: evidence.similarity_score, reverse=True)
+
+                print(all_retrieved_evidences)
 
                 # if logger.level == logging.DEBUG:
                 #     logger.debug(' ')
@@ -297,18 +302,18 @@ def determine_full_coordinates(predicted_coordinate_part, target_attribute, row,
 
 def calculate_accuracy(predicted_value, target_value, data_type):
     """Calculate the accuracy for the two provided values based on the data type"""
-    accuracy = 0
-    if data_type == 'coordinate':
-        try:
-            dist = haversine(target_value[0], target_value[1], predicted_value[0], predicted_value[1])
-            # Accurarcy == 1 if the distance of the points is 100 m at max
-            accuracy = 1 if dist <= 0.1 else 0
-        except TypeError as e:
-            logger = logging.getLogger()
-            logger.warning(e)
-
-    else:
-        accuracy = 1 if target_value == predicted_value else 0
+    # accuracy = 0
+    # if data_type == 'coordinate':
+    #     try:
+    #         dist = haversine(target_value[0], target_value[1], predicted_value[0], predicted_value[1])
+    #         # Accurarcy == 1 if the distance of the points is 100 m at max
+    #         accuracy = 1 if dist <= 0.1 else 0
+    #     except TypeError as e:
+    #         logger = logging.getLogger()
+    #         logger.warning(e)
+    #
+    # else:
+    accuracy = 1 if target_value == predicted_value else 0
     return accuracy
 
 

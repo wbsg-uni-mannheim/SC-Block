@@ -1,6 +1,7 @@
 name: sc-block
 channels:
   - defaults
+  - conda-forge
 dependencies:
   - python=3.9
   - click
@@ -9,4 +10,6 @@ dependencies:
   - phonenumbers
   - country_converter
   - pyyaml
-prefix: /home/alebrink/anaconda3/envs/sc-block
+  - transformers
+  - fasttext
+  - pytorch
