@@ -13,16 +13,16 @@ PREEPOCHS=$6
 AUG=$7
 PREAUG=$8
 
-export PYTHONPATH=/home/alebrink/development/table-augmentation-framework/
+export PYTHONPATH=$(pwd)
 export CUDA_VISIBLE_DEVICES=0
 
 python run_finetune_siamese.py \
 	--model_pretrained_checkpoint /ceph/alebrink/table-augmentation-framework/contrastive-product-matching/reports/contrastive/walmart-amazon-clean-$AUG$PREBATCH-$LR-$TEMP-$PREEPOCHS-roberta-base/pytorch_model.bin \
     --do_train \
 	--dataset_name=walmart-amazon \
-    --train_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
-	--validation_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
-	--test_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-gs.json.gz \
+    --train_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+	--validation_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+	--test_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-gs.json.gz \
 	--evaluation_strategy=epoch \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=False \

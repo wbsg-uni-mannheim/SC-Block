@@ -10,19 +10,19 @@ TEMP=$3
 EPOCHS=$4
 AUG=$5
 
-export PYTHONPATH=/home/alebrink/development/table-augmentation-framework/
+export PYTHONPATH=$(pwd)
 export CUDA_VISIBLE_DEVICES=1
 
 python run_pretraining_deepmatcher.py \
     --do_train \
 	--dataset_name=amazon-google \
 	--clean=True \
-    	--train_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
-    	--validation_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
-	--id_deduction_set /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/amazon-google/amazon-google-train.json.gz \
+    	--train_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
+    	--validation_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
+	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/amazon-google/amazon-google-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
-    --output_dir /ceph/alebrink/contrastive-product-matching/reports/contrastive/amazon-google-clean-validation-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
+    --output_dir $(pwd)/reports/contrastive/amazon-google-clean-validation-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
 	--temperature=$TEMP \
 	--per_device_train_batch_size=$BATCH \
 	--per_device_eval_batch_size=$BATCH \

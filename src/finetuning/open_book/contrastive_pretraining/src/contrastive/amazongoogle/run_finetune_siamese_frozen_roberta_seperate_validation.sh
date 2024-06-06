@@ -13,20 +13,20 @@ PREEPOCHS=$6
 AUG=$7
 PREAUG=$8
 
-export PYTHONPATH=/home/alebrink/development/table-augmentation-framework/
+export PYTHONPATH=$(pwd)
 export CUDA_VISIBLE_DEVICES=1
 
 python run_finetune_siamese.py \
-	--model_pretrained_checkpoint /ceph/alebrink/contrastive-product-matching/reports/contrastive/abtbuy-clean-validation-$PREAUG$PREBATCH-$LR-$TEMP-$PREEPOCHS-roberta-base/pytorch_model.bin \
+	--model_pretrained_checkpoint $(pwd)/reports/contrastive/abtbuy-clean-validation-$PREAUG$PREBATCH-$LR-$TEMP-$PREEPOCHS-roberta-base/pytorch_model.bin \
     --do_train \
 	--dataset_name=abt-buy \
-    --train_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-train.json.gz \
-	--validation_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-train.json.gz \
-	--test_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-gs.json.gz \
+    --train_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-train.json.gz \
+	--validation_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-train.json.gz \
+	--test_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-gs.json.gz \
 	--evaluation_strategy=epoch \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=False \
-    --output_dir /ceph/alebrink/contrastive-product-matching/reports/contrastive-ft-siamese/abtbuy-clean-validation-$AUG$PREBATCH-$PREAUG$LR-$TEMP-$PREEPOCHS-$EPOCHS-frozen-roberta-base/ \
+    --output_dir $(pwd)/reports/contrastive-ft-siamese/abtbuy-clean-validation-$AUG$PREBATCH-$PREAUG$LR-$TEMP-$PREEPOCHS-$EPOCHS-frozen-roberta-base/ \
 	--per_device_train_batch_size=$BATCH \
 	--learning_rate=$LR \
 	--weight_decay=0.01 \

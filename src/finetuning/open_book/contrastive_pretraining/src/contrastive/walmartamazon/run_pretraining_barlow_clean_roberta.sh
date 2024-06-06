@@ -10,18 +10,18 @@ EPOCHS=$3
 
 AUG="del"
 
-export PYTHONPATH=/home/alebrink/development/table-augmentation-framework/
+export PYTHONPATH=$(pwd)
 export CUDA_VISIBLE_DEVICES=0
 
 python run_pretraining_barlow_deepmatcher.py \
     --do_train \
 	--dataset_name=walmart-amazon \
 	--clean=True \
-    --train_file /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/processed/walmart-amazon/contrastive/walmart-amazon-train.pkl.gz \
-	--id_deduction_set /home/alebrink/development/table-augmentation-framework/src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+    --train_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/processed/walmart-amazon/contrastive/walmart-amazon-train.pkl.gz \
+	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
-    --output_dir /ceph/alebrink/contrastive-product-matching/reports/contrastive/walmart-amazon-barlow-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
+    --output_dir $(pwd)/reports/contrastive/walmart-amazon-barlow-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
 	--per_device_train_batch_size=$BATCH \
 	--learning_rate=$LR \
 	--weight_decay=0.01 \

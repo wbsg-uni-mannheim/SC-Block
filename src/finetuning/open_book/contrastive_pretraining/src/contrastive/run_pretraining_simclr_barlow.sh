@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PYTHONPATH=/home/alebrink/development/table-augmentation-framework/
+export PYTHONPATH=$(pwd)
 export CUDA_VISIBLE_DEVICES=3
 
 chmod +x abtbuy/run_pretraining_simclr_clean_roberta.sh

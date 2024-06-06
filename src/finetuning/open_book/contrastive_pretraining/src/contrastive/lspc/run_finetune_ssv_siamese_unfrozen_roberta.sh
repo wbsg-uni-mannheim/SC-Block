@@ -11,17 +11,17 @@ SIZE=$4
 AUG=$5
 PREAUG=$6
 python run_finetune_siamese.py \
-	--model_pretrained_checkpoint /your_path/contrastive-product-matching/reports/contrastive/computers-ssv-$SIZE-$PREAUG$BATCH-$LR-$TEMP-roberta-base/pytorch_model.bin \
+	--model_pretrained_checkpoint $(pwd)/reports/contrastive/computers-ssv-$SIZE-$PREAUG$BATCH-$LR-$TEMP-roberta-base/pytorch_model.bin \
     --do_train \
 	--frozen=False \
-    --train_file /your_path/contrastive-product-matching/data/interim/wdc-lspc/training-sets/preprocessed_computers_train_$SIZE.pkl.gz \
+    --train_file $(pwd)/contrastive-product-matching/data/interim/wdc-lspc/training-sets/preprocessed_computers_train_$SIZE.pkl.gz \
 	--train_size=$SIZE \
-	--validation_file /your_path/contrastive-product-matching/data/interim/wdc-lspc/training-sets/preprocessed_computers_train_$SIZE.pkl.gz \
-	--test_file /your_path/contrastive-product-matching/data/interim/wdc-lspc/gold-standards/preprocessed_computers_gs.pkl.gz \
+	--validation_file $(pwd)/contrastive-product-matching/data/interim/wdc-lspc/training-sets/preprocessed_computers_train_$SIZE.pkl.gz \
+	--test_file $(pwd)/contrastive-product-matching/data/interim/wdc-lspc/gold-standards/preprocessed_computers_gs.pkl.gz \
 	--evaluation_strategy=epoch \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
-    --output_dir /your_path/contrastive-product-matching/reports/contrastive-ft-siamese/computers-ssv-$SIZE-$AUG$BATCH-$PREAUG$LR-$TEMP-unfrozen-roberta-base/ \
+    --output_dir $(pwd)/reports/contrastive-ft-siamese/computers-ssv-$SIZE-$AUG$BATCH-$PREAUG$LR-$TEMP-unfrozen-roberta-base/ \
 	--per_device_train_batch_size=64 \
 	--learning_rate=5e-05 \
 	--weight_decay=0.01 \

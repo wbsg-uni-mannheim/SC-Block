@@ -10,7 +10,7 @@ TEMP=$3
 AUG=$4
 PREAUG=$5
 
-export PYTHONPATH=/home/alebrink/development/table-augmentation-framework/
+export PYTHONPATH=$(pwd)
 export CUDA_VISIBLE_DEVICES=0
 
 python run_finetune_siamese.py \

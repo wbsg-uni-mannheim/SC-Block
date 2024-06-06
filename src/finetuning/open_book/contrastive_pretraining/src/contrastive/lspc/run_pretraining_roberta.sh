@@ -11,11 +11,11 @@ SIZE=$4
 AUG=$5
 python run_pretraining.py \
     --do_train \
-    --train_file /your_path/contrastive-product-matching/data/processed/wdc-lspc/contrastive/pre-train/computers/computers_train_$SIZE.pkl.gz \
-	--id_deduction_set /your_path/contrastive-product-matching/data/raw/wdc-lspc/training-sets/computers_train_$SIZE.json.gz \
+    --train_file $(pwd)/contrastive-product-matching/data/processed/wdc-lspc/contrastive/pre-train/computers/computers_train_$SIZE.pkl.gz \
+	--id_deduction_set $(pwd)/contrastive-product-matching/data/raw/wdc-lspc/training-sets/computers_train_$SIZE.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
-    --output_dir /your_path/contrastive-product-matching/reports/contrastive/computers-$SIZE-$AUG$BATCH-$LR-$TEMP-roberta-base/ \
+    --output_dir $(pwd)/reports/contrastive/computers-$SIZE-$AUG$BATCH-$LR-$TEMP-roberta-base/ \
 	--temperature=$TEMP \
 	--per_device_train_batch_size=$BATCH \
 	--learning_rate=$LR \
