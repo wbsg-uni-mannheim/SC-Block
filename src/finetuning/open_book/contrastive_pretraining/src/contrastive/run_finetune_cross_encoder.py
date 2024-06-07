@@ -31,9 +31,9 @@ from transformers import (
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 
-#from src.finetuning.open_book.contrastive_product_matching.src.contrastive.models.modeling import ContrastiveClassifierModel
-#from src.finetuning.open_book.contrastive_product_matching.src.contrastive.data.datasets import ContrastiveClassificationDataset
-#from src.finetuning.open_book.contrastive_product_matching.src.contrastive.data.data_collators import DataCollatorContrastiveClassification
+#from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.modeling import ContrastiveClassifierModel
+#from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.datasets import ContrastiveClassificationDataset
+#from src.finetuning.open_book.contrastive_pretraining.src.contrastive.data.data_collators import DataCollatorContrastiveClassification
 from src.finetuning.open_book.contrastive_pretraining.src.contrastive.models.metrics import compute_metrics_bce, \
     compute_metrics_soft_max
 

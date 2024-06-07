@@ -8,7 +8,7 @@ general:
   clusters: False
 
 query-tables:
-  schema_org_class: 'wdc-b'
+  schema_org_class: 'wdcproducts80cc20rnd050un'
   gt-table: null
   #gt-table: 'iherb_com'
   path-to-query-table: null

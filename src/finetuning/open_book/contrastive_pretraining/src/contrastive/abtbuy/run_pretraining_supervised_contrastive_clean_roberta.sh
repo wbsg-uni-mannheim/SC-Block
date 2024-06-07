@@ -21,8 +21,8 @@ python run_pretraining_deepmatcher.py \
     --do_train \
 	--dataset_name=abt-buy \
 	--clean=True \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/processed/abt-buy/contrastive/abt-buy-train.pkl.gz \
-	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/abt-buy/abt-buy-train.json.gz \
+    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/processed/abt-buy/contrastive/abt-buy-train.pkl.gz \
+	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/abt-buy/abt-buy-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
     --output_dir $(pwd)/reports/contrastive/abtbuy-clean-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base-$SERIALIZATION/ \

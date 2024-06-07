@@ -6,24 +6,22 @@
 #SBATCH --export=NONE
 BATCH=$1
 LR=$2
-TEMP=$3
-EPOCHS=$4
+EPOCHS=$3
 
 AUG="del"
 
 export PYTHONPATH=$(pwd)
-export CUDA_VISIBLE_DEVICES=4
+#export CUDA_VISIBLE_DEVICES=0
 
-python run_pretraining_simclr_deepmatcher.py \
+python run_pretraining_barlow_deepmatcher.py \
     --do_train \
 	--dataset_name=wdcproducts80cc20rnd050un \
 	--clean=True \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_product_matching/data/processed/wdcproducts80cc20rnd050un/contrastive/wdcproducts80cc20rnd050un-additionaldata-train.pkl.gz \
-	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_product_matching/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
+    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/processed/wdcproducts80cc20rnd050un/contrastive/wdcproducts80cc20rnd050un-additionaldata-train.pkl.gz \
+	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
-    --output_dir $(pwd)/reports/contrastive/wdcproducts80cc20rnd050un-simclr-additional-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
-	--temperature=$TEMP \
+    --output_dir $(pwd)/reports/contrastive/wdcproducts80cc20rnd050un-barlow-additional-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
 	--per_device_train_batch_size=$BATCH \
 	--learning_rate=$LR \
 	--weight_decay=0.01 \
