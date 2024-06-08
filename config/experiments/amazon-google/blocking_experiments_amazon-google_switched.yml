@@ -1,9 +1,9 @@
 ---
 general:
-  k: 8
+  k: 3
   k_range: False # Decide if multiple k values 1 - k are tested
   save_results_with_evidences: False
-  es_instance: 'wifo5-33.informatik.uni-mannheim.de'
+  #es_instance: 'wifo5-33.informatik.uni-mannheim.de'
   experiment-type: 'retrieval'
   clusters: False
 
@@ -14,6 +14,7 @@ query-tables:
   path-to-query-table: null
   context-attributes: [ 'name', 'manufacturer', 'price' ]
   target-attributes: [ 'brand' ]
+  switched: True
 
 pipelines:
   retrieval-strategies:
@@ -26,49 +27,17 @@ pipelines:
 #      all_attributes: True
 #      tokenizer: 'tri-gram'
 
-#    - name: 'query_by_neural_entity'
-#      bi-encoder: 'supcon_bi_encoder'
-#      # Choose pooling 'mean' or 'cls' for now
-#      pooling: [ 'mean' ]
-#      # Choose simialrities 'cos', 'f2' or 'ip' for now
-#      similarity: [ 'cos' ]
-#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-del1024-5e-5-0.07-20-roberta-base' ]
-#      base_model: 'roberta-base'
-#      with_projection: False
-#      projection: 768
-
     - name: 'query_by_neural_entity'
       bi-encoder: 'supcon_bi_encoder'
       # Choose pooling 'mean' or 'cls' for now
       pooling: [ 'mean' ]
       # Choose simialrities 'cos', 'f2' or 'ip' for now
       similarity: [ 'cos' ]
-      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-1024-5e-5-0.07-5-roberta-base' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazon-google-clean-1024-5e-5-0.07-20-roberta-base' ]
       base_model: 'roberta-base'
       with_projection: False
       projection: 768
-
-    - name: 'query_by_neural_entity'
-      bi-encoder: 'supcon_bi_encoder'
-      # Choose pooling 'mean' or 'cls' for now
-      pooling: [ 'mean' ]
-      # Choose simialrities 'cos', 'f2' or 'ip' for now
-      similarity: [ 'cos' ]
-      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-1024-5e-5-0.07-10-roberta-base' ]
-      base_model: 'roberta-base'
-      with_projection: False
-      projection: 768
-
-    - name: 'query_by_neural_entity'
-      bi-encoder: 'supcon_bi_encoder'
-      # Choose pooling 'mean' or 'cls' for now
-      pooling: [ 'mean' ]
-      # Choose simialrities 'cos', 'f2' or 'ip' for now
-      similarity: [ 'cos' ]
-      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-1024-5e-5-0.07-30-roberta-base' ]
-      base_model: 'roberta-base'
-      with_projection: False
-      projection: 768
+      without_special_tokens_and_attribute_names: True
 
 #    - name: 'query_by_neural_entity'
 #      bi-encoder: 'supcon_bi_encoder'

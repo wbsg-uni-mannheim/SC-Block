@@ -1,6 +1,6 @@
 ---
 general:
-  k: 8
+  k: 20
   k_range: False # Decide if multiple k values 1 - k are tested
   save_results_with_evidences: False
   es_instance: 'wifo5-33.informatik.uni-mannheim.de'
@@ -8,16 +8,15 @@ general:
   clusters: False
 
 query-tables:
-  dataset: 'amazon-google'
+  dataset: 'wdcproducts80cc20rnd050un_block_m_train_l'
   gt-table: null
   #gt-table: 'iherb_com'
   path-to-query-table: null
-  context-attributes: [ 'name', 'manufacturer', 'price' ]
+  context-attributes: ['brand', 'name', 'price', 'pricecurrency', 'description']
   target-attributes: [ 'brand' ]
 
 pipelines:
   retrieval-strategies:
-
 #    - name: 'query_by_entity'
 #      all_attributes: True
 #      tokenizer: null
@@ -32,10 +31,11 @@ pipelines:
 #      pooling: [ 'mean' ]
 #      # Choose simialrities 'cos', 'f2' or 'ip' for now
 #      similarity: [ 'cos' ]
-#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-del1024-5e-5-0.07-20-roberta-base' ]
+#      model_name: ['/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd050un-clean-1024-5e-5-0.07-20-roberta-base-no_attribute_names']
 #      base_model: 'roberta-base'
 #      with_projection: False
 #      projection: 768
+#      without_special_tokens_and_attribute_names: True
 
     - name: 'query_by_neural_entity'
       bi-encoder: 'supcon_bi_encoder'
@@ -43,7 +43,7 @@ pipelines:
       pooling: [ 'mean' ]
       # Choose simialrities 'cos', 'f2' or 'ip' for now
       similarity: [ 'cos' ]
-      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-1024-5e-5-0.07-5-roberta-base' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd050un-clean-1024-5e-5-0.07-5-roberta-base' ]
       base_model: 'roberta-base'
       with_projection: False
       projection: 768
@@ -54,7 +54,7 @@ pipelines:
       pooling: [ 'mean' ]
       # Choose simialrities 'cos', 'f2' or 'ip' for now
       similarity: [ 'cos' ]
-      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-1024-5e-5-0.07-10-roberta-base' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd050un-clean-1024-5e-5-0.07-10-roberta-base' ]
       base_model: 'roberta-base'
       with_projection: False
       projection: 768
@@ -65,7 +65,7 @@ pipelines:
       pooling: [ 'mean' ]
       # Choose simialrities 'cos', 'f2' or 'ip' for now
       similarity: [ 'cos' ]
-      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazongoogle-clean-1024-5e-5-0.07-30-roberta-base' ]
+      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd050un-clean-1024-5e-5-0.07-30-roberta-base' ]
       base_model: 'roberta-base'
       with_projection: False
       projection: 768
@@ -76,7 +76,7 @@ pipelines:
 #      pooling: [ 'mean' ]
 #      # Choose simialrities 'cos', 'f2' or 'ip' for now
 #      similarity: [ 'cos' ]
-#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazon-google-barlow-del64-5e-5--20-roberta-base' ]
+#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd-barlow-del64-5e-5--20-roberta-base' ]
 #      base_model: 'roberta-base'
 #      with_projection: False
 #      projection: 768
@@ -87,13 +87,12 @@ pipelines:
 #      pooling: [ 'mean' ]
 #      # Choose simialrities 'cos', 'f2' or 'ip' for now
 #      similarity: [ 'cos' ]
-#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/amazon-google-simclr-del1024-5e-5-0.07-20-roberta-base' ]
+#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd-simclr-del1024-5e-5-0.07-20-roberta-base' ]
 #      base_model: 'roberta-base'
 #      with_projection: False
 #      projection: 768
 
   similarity-re-ranking-strategies:
-  #  - name: null
 
     - name: 'Dummy Similarity Reranker'
 

@@ -20,9 +20,9 @@ python run_finetune_siamese.py \
 	--model_pretrained_checkpoint $(pwd)/reports/contrastive/walmart-amazon-clean-no-split-$AUG$PREBATCH-$LR-$TEMP-$PREEPOCHS-roberta-base/pytorch_model.bin \
     --do_train \
 	--dataset_name=walmart-amazon \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
-	--validation_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
-	--test_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-gs.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+	--validation_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+	--test_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-gs.json.gz \
 	--evaluation_strategy=epoch \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=False \

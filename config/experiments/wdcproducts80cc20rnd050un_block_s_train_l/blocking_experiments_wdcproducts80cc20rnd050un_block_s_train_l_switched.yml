@@ -1,0 +1,74 @@
+---
+general:
+  k: 13
+  k_range: False # Decide if multiple k values 1 - k are tested
+  save_results_with_evidences: False
+  es_instance: 'wifo5-33.informatik.uni-mannheim.de'
+  experiment-type: 'retrieval'
+  clusters: False
+
+query-tables:
+  dataset: 'wdcproducts80cc20rnd050un_block_s_train_l'
+  gt-table: null
+  #gt-table: 'iherb_com'
+  path-to-query-table: null
+  context-attributes: ['brand', 'name', 'price', 'pricecurrency', 'description']
+  target-attributes: [ 'brand' ]
+  switched: True
+
+pipelines:
+  retrieval-strategies:
+#    - name: 'query_by_entity'
+#      all_attributes: True
+#      tokenizer: null
+#
+#    - name: 'query_by_entity'
+#      all_attributes: True
+#      tokenizer: 'tri-gram'
+
+    - name: 'query_by_neural_entity'
+      bi-encoder: 'supcon_bi_encoder'
+      # Choose pooling 'mean' or 'cls' for now
+      pooling: [ 'mean' ]
+      # Choose simialrities 'cos', 'f2' or 'ip' for now
+      similarity: [ 'cos' ]
+      model_name: ['/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd050un-clean-1024-5e-5-0.07-20-roberta-base']
+      base_model: 'roberta-base'
+      with_projection: False
+      projection: 768
+
+#    - name: 'query_by_neural_entity'
+#      bi-encoder: 'supcon_bi_encoder'
+#      # Choose pooling 'mean' or 'cls' for now
+#      pooling: [ 'mean' ]
+#      # Choose simialrities 'cos', 'f2' or 'ip' for now
+#      similarity: [ 'cos' ]
+#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd-barlow-del64-5e-5--20-roberta-base' ]
+#      base_model: 'roberta-base'
+#      with_projection: False
+#      projection: 768
+#
+#    - name: 'query_by_neural_entity'
+#      bi-encoder: 'supcon_bi_encoder'
+#      # Choose pooling 'mean' or 'cls' for now
+#      pooling: [ 'mean' ]
+#      # Choose simialrities 'cos', 'f2' or 'ip' for now
+#      similarity: [ 'cos' ]
+#      model_name: [ '/ceph/alebrink/contrastive-product-matching/reports/contrastive/wdcproducts80cc20rnd-simclr-del1024-5e-5-0.07-20-roberta-base' ]
+#      base_model: 'roberta-base'
+#      with_projection: False
+#      projection: 768
+
+  similarity-re-ranking-strategies:
+
+    - name: 'Dummy Similarity Reranker'
+
+  source-re-ranking-strategies:
+    - name: null
+  #     -
+  #        name: 'page_rank_re_ranker'
+
+  voting-strategies:
+    - name: simple
+#      -
+#        name: weighted

@@ -17,8 +17,8 @@ python run_pretraining.py \
     --do_train \
 	--dataset_name=walmart-amazon \
 	--clean=True \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/processed/walmart-amazon/contrastive/walmart-amazon-train.pkl.gz \
-	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/processed/walmart-amazon/contrastive/walmart-amazon-train.pkl.gz \
+	--id_deduction_set $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
     --output_dir $(pwd)/reports/contrastive/walmart-amazon-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \

@@ -368,19 +368,19 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
             train_data = pd.read_json(deduction_set, lines=True)
             
             if dataset == 'abt-buy':
-                val = pd.read_csv('../../data/interim/abt-buy/abt-buy-valid.csv')
+                val = pd.read_csv('src/finetuning/open_book/contrastive_pretraining/data/interim/abt-buy/abt-buy-valid.csv')
             elif dataset == 'amazon-google':
-                val = pd.read_csv('../../data/interim/amazon-google/amazon-google-valid.csv')
+                val = pd.read_csv('src/finetuning/open_book/contrastive_pretraining/data/interim/amazon-google/amazon-google-valid.csv')
             elif dataset == 'dblp-acm':
-                val = pd.read_csv('../../data/interim/dblp-acm/dblp-acm-valid.csv')
+                val = pd.read_csv('src/finetuning/open_book/contrastive_pretraining/data/interim/dblp-acm/dblp-acm-valid.csv')
             elif dataset == 'dblp-googlescholar':
-                val = pd.read_csv('../../data/interim/dblp-googlescholar/dblp-googlescholar-valid.csv')
+                val = pd.read_csv('src/finetuning/open_book/contrastive_pretraining/data/interim/dblp-googlescholar/dblp-googlescholar-valid.csv')
             elif dataset == 'walmart-amazon':
-                val = pd.read_csv('../../data/interim/walmart-amazon/walmart-amazon-valid.csv')
+                val = pd.read_csv('src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-valid.csv')
             elif dataset == 'wdcproducts80cc20rnd050un':
-                val = pd.read_csv('../../data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-valid.csv')
+                val = pd.read_csv('src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-valid.csv')
             elif dataset == 'wdcproducts80cc20rnd000un':
-                val = pd.read_csv('../../data/interim/wdcproducts80cc20rnd000un/wdcproducts80cc20rnd000un-valid.csv')
+                val = pd.read_csv('src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd000un/wdcproducts80cc20rnd000un-valid.csv')
 
             # use 80% of train and val set positives to build correspondence graph
             val_set = train_data[train_data['pair_id'].isin(val['pair_id'])]
@@ -395,7 +395,7 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
 
             if dataset_type == 'train+valid':
                 # Pre-train on train + validation
-                train_data = train_data.append(val_set_pos)
+                train_data = pd.concat([train_data, val_set_pos])
             elif dataset_type == 'train':
                 # Pre-train on train
                 train_data = train_data
@@ -469,19 +469,17 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
             # source aware sampling, build one sample per dataset
             if split:
                 data1 = data.copy().drop(single_entities['id'])
-                data1 = data1.append(single_entities_left)
+                data1 = pd.concat([data1,single_entities_left])
 
                 data2 = data.copy().drop(single_entities['id'])
-                data2 = data2.append(single_entities_right)
+                data2 = pd.concat([data2,single_entities_right])
 
             else:
                 data1 = data.copy().drop(single_entities['id'])
-                data1 = data1.append(single_entities_left)
-                data1 = data1.append(single_entities_right)
+                data1 = pd.concat([data1, single_entities_left, single_entities_right])
 
                 data2 = data.copy().drop(single_entities['id'])
-                data2 = data2.append(single_entities_left)
-                data2 = data2.append(single_entities_right)
+                data2 = pd.concat([data2, single_entities_left, single_entities_right])
                 print('Not doing the split!')
 
             if intermediate_set is not None:
@@ -494,8 +492,8 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
                         interm_data = interm_data.rename(columns={'brand':'manufacturer'})
                     interm_data['cluster_id'] = interm_data['cluster_id']+10000
 
-                data1 = data1.append(interm_data)
-                data2 = data2.append(interm_data)
+                data1 = pd.concat([data1, interm_data])
+                data2 = pd.concat([data2, interm_data])
 
             data1 = data1.reset_index(drop=True)
             data2 = data2.reset_index(drop=True)
@@ -522,12 +520,14 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
 
         diff = abs(len(data1)-len(data2))
 
+        print(type(data1))
+
         if len(data1) > len(data2):
             if len(data2) < diff:
                 sample = data2.sample(diff, replace=True)
             else:
                 sample = data2.sample(diff)
-            data2 = data2.append(sample)
+            data2 = pd.concat([data2, sample])
             data2 = data2.reset_index(drop=True)
 
         elif len(data2) > len(data1):
@@ -535,14 +535,15 @@ class ContrastivePretrainDatasetDeepmatcher(torch.utils.data.Dataset):
                 sample = data1.sample(diff, replace=True)
             else:
                 sample = data1.sample(diff)
-            data1 = data1.append(sample)
+            data1 = pd.concat([data1, sample])
             data1 = data1.reset_index(drop=True)
 
         self.data1 = data1
         self.data2 = data2
 
+        print(type(data1))
         print(' ')
-        for index, value in data1['features'][:5].iteritems():
+        for index, value in data1['features'][:5].items():
             print(value)
         print(' ')
 

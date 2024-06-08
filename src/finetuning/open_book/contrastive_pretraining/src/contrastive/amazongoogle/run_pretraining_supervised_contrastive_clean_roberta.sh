@@ -13,15 +13,15 @@ AUG=$6
 
 AUG="del"
 
-export PYTHONPATH=/home/alebrink/development/sc-block
+export PYTHONPATH=$(pwd)/src/finetuning/open_book/contrastive_pretraining/src/contrastive/
 #export CUDA_VISIBLE_DEVICES=1
 
 python run_pretraining_deepmatcher.py \
     --do_train \
 	--dataset_name=amazon-google \
 	--clean=True \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
-	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/amazon-google/amazon-google-train.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
+	--id_deduction_set $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/amazon-google/amazon-google-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
     --output_dir $(pwd)/reports/contrastive/amazongoogle-clean-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base-$SERIALIZATION/ \

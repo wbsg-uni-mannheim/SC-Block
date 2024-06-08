@@ -16,9 +16,9 @@ python run_finetune_cross_encoder.py \
 	--model_pretrained_checkpoint="roberta-base" \
     --do_train \
 	--dataset_name=walmart-amazon \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
-	--validation_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
-	--test_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-gs.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+	--validation_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+	--test_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-gs.json.gz \
 	--evaluation_strategy=epoch \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=False \

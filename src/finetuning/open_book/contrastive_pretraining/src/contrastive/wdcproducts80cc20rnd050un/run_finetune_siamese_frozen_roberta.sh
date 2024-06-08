@@ -20,9 +20,9 @@ python run_finetune_siamese.py \
 	--model_pretrained_checkpoint $(pwd)/reports/contrastive/wdcproducts80cc20rnd050un-clean-$AUG$PREBATCH-$LR-$TEMP-$PREEPOCHS-roberta-base/pytorch_model.bin \
     --do_train \
 	--dataset_name=wdcproducts80cc20rnd050un \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
-	--validation_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
-	--test_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-gs.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
+	--validation_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
+	--test_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-gs.json.gz \
 	--evaluation_strategy=epoch \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=False \

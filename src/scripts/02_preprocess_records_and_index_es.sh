@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ES_INSTANCE=wifo5-33.informatik.uni-mannheim.de
+export ES_INSTANCE=# ES_Instance
 export DATA_DIR=$(pwd)/data
 export PYTHONPATH=$(pwd)
 

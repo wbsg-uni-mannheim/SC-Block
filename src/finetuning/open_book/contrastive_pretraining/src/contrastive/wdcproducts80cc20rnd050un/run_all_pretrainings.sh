@@ -10,7 +10,7 @@ chmod +x wdcproducts80cc20rnd050un/run_pretraining_barlow_clean_roberta.sh
 
 chmod +x wdcproducts80cc20rnd050un/run_pretraining_clean_roberta.sh
 ./wdcproducts80cc20rnd050un/run_pretraining_clean_roberta.sh 1024 5e-5 0.07 20
-./wdcproducts80cc20rnd050un/run_pretraining_clean_roberta.sh 1024 5e-5 0.07 200
+#./wdcproducts80cc20rnd050un/run_pretraining_clean_roberta.sh 1024 5e-5 0.07 200
 
 #chmod +x wdcproducts80cc20rnd050un/run_finetune_siamese_frozen_roberta.sh
 #./wdcproducts80cc20rnd050un/run_finetune_siamese_frozen_roberta.sh 64 1024 5e-5 0.07 50 20

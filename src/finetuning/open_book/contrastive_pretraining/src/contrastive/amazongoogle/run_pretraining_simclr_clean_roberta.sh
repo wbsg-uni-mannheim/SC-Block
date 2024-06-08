@@ -18,8 +18,8 @@ python run_pretraining_simclr_deepmatcher.py \
     --do_train \
 	--dataset_name=amazon-google \
 	--clean=True \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
-	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/amazon-google/amazon-google-train.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/processed/amazon-google/contrastive/amazon-google-train.pkl.gz \
+	--id_deduction_set $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/amazon-google/amazon-google-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
     --output_dir $(pwd)/reports/contrastive/amazon-google-simclr-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \

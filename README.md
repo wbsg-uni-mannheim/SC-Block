@@ -27,10 +27,12 @@ conda env create -f environment.yml
 To reproduce the results run the following scripts consecutively from the root directory:
 
 - `src/scripts/01_prepare_datasets.sh` prepares the datasets (query table and index table)
-- `src/scripts/02_load_data_into_es.sh` loads the contents of the index table into an elastic search index
-- `src/scripts/03_process_training_data.sh` prepares the contrastive training
+- `src/scripts/02_preprocess_records_and_index_es.sh` loads the contents of the index table into an elastic search index.
+- `src/scripts/03_process_training_data.sh` prepares the contrastive training. Running this script is optional, as we provide the training data in the folder `src/finetuning/open_book/contrastive_pretraining/data`.
 - `src/scripts/04_load_data_into_faiss.sh` embeds records and loads the embeddings into faiss. Please be aware that you have to train the respective models first.
 - `src/scripts/05_run_strategy.sh` runs selected blocking and matching strategies.
+
+After running the experiments, the results can be found in the folder `data/results`.
 
 ### Train contrastive models
 Navigate to the folder `src/finetuning/open_book/contrastive_pretraining/src/contrastive`

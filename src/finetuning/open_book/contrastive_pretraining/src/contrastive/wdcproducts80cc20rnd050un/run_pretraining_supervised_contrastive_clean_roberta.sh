@@ -11,15 +11,15 @@ EPOCHS=$4
 SERIALIZATION=$5
 AUG=$6
 
-export PYTHONPATH=/home/alebrink/development/sc-block
+export PYTHONPATH=$(pwd)
 #export CUDA_VISIBLE_DEVICES=7
 
 python run_pretraining_deepmatcher.py \
     --do_train \
 	--dataset_name=wdcproducts80cc20rnd050un \
 	--clean=True \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/processed/wdcproducts80cc20rnd050un/contrastive/wdcproducts80cc20rnd050un-train.pkl.gz \
-	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/processed/wdcproducts80cc20rnd050un/contrastive/wdcproducts80cc20rnd050un-train.pkl.gz \
+	--id_deduction_set $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/wdcproducts80cc20rnd050un/wdcproducts80cc20rnd050un-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
     --output_dir $(pwd)/reports/contrastive/wdcproducts80cc20rnd050un-clean-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base-$SERIALIZATION/ \

@@ -18,8 +18,8 @@ python run_pretraining_deepmatcher.py \
 	--dataset_name=walmart-amazon \
 	--clean=True \
 	--split=False \
-    --train_file $(pwd)src/finetuning/open_book/contrastive_pretraining/data/processed/walmart-amazon/contrastive/walmart-amazon-train.pkl.gz \
-	--id_deduction_set $(pwd)src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
+    --train_file $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/processed/walmart-amazon/contrastive/walmart-amazon-train.pkl.gz \
+	--id_deduction_set $(pwd)/src/finetuning/open_book/contrastive_pretraining/data/interim/walmart-amazon/walmart-amazon-train.json.gz \
 	--tokenizer="roberta-base" \
 	--grad_checkpoint=True \
     --output_dir $(pwd)/reports/contrastive/walmart-amazon-clean-no-split-$AUG$BATCH-$LR-$TEMP-$EPOCHS-roberta-base/ \
