@@ -31,3 +31,5 @@ Please run the scripts from the root directory of the repository.
 
 After training the models can be used to embed records and build a blocking index.
 You can find the trained models in the folder `reports/contrastive`.
+
+The code in this repository is based on the code of the paper "Supervised Contrastive Learning for Product Matching" by Ralph Peeters and Christian Bizer. The code can be found [here](https://github.com/wbsg-uni-mannheim/contrastive-product-matching).

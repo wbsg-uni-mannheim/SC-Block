@@ -95,7 +95,8 @@ dependencies:
   - yarl=1.9.3=py39h5eee18b_0
   - zlib=1.2.13=h5eee18b_0
   - pip:
-    - accelerate==0.31.0
+    - --find-links https://download.pytorch.org/whl/torch_stable.html
+    - accelerate==0.20.3
     - annotated-types==0.6.0
     - blis==0.7.11
     - catalogue==2.0.10

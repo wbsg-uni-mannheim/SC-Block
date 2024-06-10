@@ -38,7 +38,7 @@ class SupConBiEncoder(BiEncoder):
             self.tokenizer = AutoTokenizer.from_pretrained(base_model, additional_special_tokens=('[COL]', '[VAL]'))
             # Note: Normalization + pooling happen in the model
             self.model = ContrastiveModel(len_tokenizer=len(self.tokenizer), model=base_model).to(self.device)
-            print('I am here')
+
             if self.pooling != 'mean':
                 self.model.pool = False
             self.model.load_state_dict(torch.load('{}/pytorch_model.bin'.format(model_path), map_location=torch.device(self.device)), strict=False)

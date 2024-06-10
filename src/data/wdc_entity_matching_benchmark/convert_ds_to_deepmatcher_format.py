@@ -51,8 +51,6 @@ def convert_table_to_query_table(dataset, testset, size, modify_data):
 
         # Determine left offer ids per cluster id
         for cluster_id in tqdm(cluster_ids):
-            # if cluster_id == 1703942:
-            #     print('I am here!')
             # Get Offer ids for train & valid
             offer_ids = [ds_sets[split].loc[(ds_sets[split]['cluster_id_left'] == cluster_id)]['id_left'].unique()
                           for split in ds_sets]
@@ -126,10 +124,6 @@ def convert_table_to_query_table(dataset, testset, size, modify_data):
             offer_ids = [ds_sets[split].loc[(ds_sets[split]['cluster_id_left'] == cluster_id) & (
                         ds_sets[split]['cluster_id_right'] == cluster_id)]['id_left'].unique() for split in ds_sets]
             offer_ids = set([offer_id for offer_id_list in offer_ids for offer_id in offer_id_list])
-            if len(offer_ids) > 1:
-                print('I am here!')
-            elif len(offer_ids) == 0:
-                print('Now I am here!')
 
         for split in splits:
             print(len(ds_sets[split]))
